@@ -238,25 +238,35 @@
 
   @media (max-width: 900px) {
     .shell { grid-template-columns: 1fr; }
-    /* Stage pins to the top and the copy scrolls beneath it. z-index is
-       required, not cosmetic: .block is position:relative (for its ambient
-       ::before pool), so without this the copy paints OVER the sticky stage
-       and the 3D model bleeds through the text. Stays under header.top (5). */
-    .stagewrap { height: 34svh; order: -1; background: var(--paper); z-index: 2; }
-    /* One section per screen, as on a laptop: the stage takes a fixed slice of
-       the viewport and each block gets exactly what's left. svh (not vh) so a
-       collapsing mobile URL bar can never crop the bottom of a section. */
-    .block { min-height: 66svh; padding: 34px 0; max-width: none; }
+    /* A phone has no side column, so a sticky stage just parks itself at the
+       top and everything scrolls past it - it reads as broken rather than as
+       a fixed viewport. Let it scroll away with the hero instead, the way any
+       ordinary page behaves, and give every section the whole screen. */
+    /* relative, NOT static: .stage3d and .stepImages are absolutely positioned
+       with inset:0, so the stage has to stay their containing block. Made it
+       static once and the canvas escaped to fill the whole page, rendering the
+       model straight through the hero copy. relative still scrolls normally. */
+    .stagewrap { position: relative; height: 46svh; order: -1;
+      background: var(--paper); z-index: auto; }
+    /* One section per screen, as on a laptop. svh (not vh) so a collapsing
+       mobile URL bar can never crop the bottom of a section. */
+    .block { min-height: calc(100svh - var(--hdr, 57px)); padding: 40px 0; max-width: none; }
     .caption, .scalebar, .hint, .stepCounter { display: none; }
+
+    /* The stacked overlay set belongs to the sticky stage. With the stage gone
+       by the time you reach the process, each photo is moved into its own step
+       instead (placeStepImages), so it sits beside the words it illustrates. */
+    .stepImages { display: none; }
+    ol.steps { gap: 46px; }
+    ol.steps li > img { grid-column: 1 / -1; width: 100%; height: 208px;
+      object-fit: cover; margin: 0 0 14px; border: 1px solid var(--line);
+      filter: saturate(.58) sepia(.30) hue-rotate(-10deg) brightness(.88) contrast(1.06); }
     .baGrid img { height: 150px; }
     .materials { grid-template-columns: 1fr; gap: 24px; }
     .footInner { grid-template-columns: 1fr 1fr; gap: 32px; }
     .footBase { justify-content: flex-start; }
     header.top { padding: 10px 18px; }
     .controls { gap: 8px; }
-    /* The header overlays the stage, so without this it hides the top third of
-       every step photo. Sit the photo in the part of the band that is visible. */
-    .stepImages { top: var(--hdr, 0px); }
     .btnSm { font-size: 11.5px; padding: 9px 12px; letter-spacing: .06em; }
     .btnIcon { width: 38px; height: 38px; }
   }
@@ -270,14 +280,14 @@
        column, so the same words wrap into far more lines; without this the
        sections that fit one laptop screen would each need two phone screens.
        Nothing is removed - the wording is identical, only set tighter. */
-    body { font-size: 15.5px; line-height: 1.5; }
-    .eyebrow { font-size: 10.5px; margin: 0 0 12px; }
-    h1 { font-size: 37px; margin: 0 0 16px; }
-    h2 { font-size: 25px; margin: 0 0 12px; }
-    p { margin: 0 0 13px; }
-    p.lead { font-size: 16.5px; }
-    .meta { gap: 22px; margin-top: 8px; padding-top: 14px; }
-    .meta b { font-size: 23px; }
+    body { font-size: 16.5px; line-height: 1.56; }
+    .eyebrow { font-size: 11px; margin: 0 0 16px; }
+    h1 { font-size: 42px; margin: 0 0 20px; }
+    h2 { font-size: 28px; margin: 0 0 16px; }
+    p { margin: 0 0 16px; }
+    p.lead { font-size: 18px; }
+    .meta { gap: 26px; margin-top: 12px; padding-top: 18px; }
+    .meta b { font-size: 26px; }
     .materials { gap: 14px; margin: 16px 0 2px; }
     .material { padding-top: 10px; }
     .materialName { font-size: 20px; margin: 0 0 5px; }
@@ -285,29 +295,11 @@
     .material p:last-child { font-size: 13.5px; }
     .materialNote { margin-top: 11px; padding: 10px 12px; font-size: 12.5px; }
 
-    /* A phone has no side column, so the stage costs vertical space a laptop
-       never pays. Keep it to roughly a quarter of the screen so the section
-       below it can be read in full without scrolling. */
-    .stagewrap { height: 27svh; }
-    .block { min-height: 73svh; padding: 26px 0; }
-    .materials { gap: 12px; margin: 12px 0 0; }
-    .material { padding-top: 8px; }
-    .materialName { font-size: 19px; }
-    .material p:last-child { font-size: 13px; }
-  }
-
-  /* Short phones (SE-class, <=700px tall) have the same words but far less
-     room, so the stage shrinks again and the scale steps down once more. */
-  @media (max-width: 560px) and (max-height: 720px) {
-    .stagewrap { height: 20svh; }
-    .block { min-height: 80svh; padding: 20px 0; }
-    body { font-size: 14.5px; line-height: 1.46; }
-    h1 { font-size: 31px; margin: 0 0 12px; }
-    h2 { font-size: 22px; margin: 0 0 10px; }
-    p { margin: 0 0 11px; }
-    p.lead { font-size: 15px; }
-    .eyebrow { margin: 0 0 9px; }
-    .meta b { font-size: 20px; }
+    .stagewrap { height: 42svh; }
+    .materials { gap: 16px; margin: 16px 0 0; }
+    .material { padding-top: 12px; }
+    .materialName { font-size: 21px; }
+    .material p:last-child { font-size: 14px; }
   }
 
   /* Narrow phones (<=400px): the Material section carries the most words of
@@ -315,14 +307,38 @@
      Everything below trims leading and spacing only; no wording is cut, so the
      section still reads in full on one screen like it does on a laptop. */
   @media (max-width: 400px) {
-    #material h2 { font-size: 23px; margin: 0 0 10px; }
+    #material h2 { font-size: 26px; margin: 0 0 13px; }
+    #material > p { margin: 0 0 14px; }
+    .materials { gap: 13px; margin: 14px 0 0; }
+    .material { padding-top: 10px; }
+    .materialName { font-size: 20px; margin: 0 0 5px; }
+    .materialLead { font-size: 10px; margin: 0 0 7px; }
+    .material p:last-child { font-size: 14px; line-height: 1.5; }
+    .materialNote { margin-top: 12px; padding: 11px 13px; font-size: 13.5px; line-height: 1.5; }
+  }
+
+  /* Short phones (SE-class, <=720px tall) have the same words in far less
+     room. Height is the binding constraint there, so this tier comes after the
+     <=400px width tier and wins where the two overlap. */
+  @media (max-width: 560px) and (max-height: 720px) {
+    .stagewrap { height: 36svh; }
+    .block { padding: 26px 0; }
+    body { font-size: 15.5px; line-height: 1.5; }
+    h1 { font-size: 35px; margin: 0 0 15px; }
+    h2 { font-size: 24px; margin: 0 0 12px; }
+    p { margin: 0 0 13px; }
+    p.lead { font-size: 16px; }
+    .eyebrow { margin: 0 0 11px; }
+    .meta b { font-size: 22px; }
+    #material h2 { font-size: 22px; margin: 0 0 10px; }
     #material > p { margin: 0 0 11px; }
-    .materials { gap: 8px; margin: 10px 0 0; }
-    .material { padding-top: 6px; }
+    .materials { gap: 9px; margin: 10px 0 0; }
+    .material { padding-top: 7px; }
     .materialName { font-size: 18px; margin: 0 0 4px; }
     .materialLead { font-size: 9.5px; margin: 0 0 5px; }
     .material p:last-child { font-size: 12.5px; line-height: 1.42; }
-    .materialNote { margin-top: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.45; }
+    .materialNote { margin-top: 9px; padding: 9px 11px; font-size: 12px; line-height: 1.45; }
+    ol.steps li > img { height: 170px; }
   }
 </style>
 </head>
@@ -836,7 +852,29 @@ const stepLis = Array.from(document.querySelectorAll('ol.steps > li'));
 const stepImages = Array.from(document.querySelectorAll('.stepImages img'));
 const stagewrapEl = document.getElementById('stagewrap');
 const stepCounterEl = document.getElementById('stepCounter');
+const stepImagesHost = document.getElementById('stepImages');
 let activeStepIndex = 0;
+
+// On a phone the stage is not sticky - it scrolls away with the hero (see the
+// max-width:900px rules). The step photos live inside the stage, so they would
+// scroll away with it and never be seen next to the step they illustrate.
+// Move each photo into its own <li> at phone widths, and back again above it.
+const inlineSteps = window.matchMedia('(max-width: 900px)');
+function placeStepImages() {
+  const inline = inlineSteps.matches;
+  stepImages.forEach((img, i) => {
+    const li = stepLis[i];
+    if (!li) return;
+    if (inline) {
+      if (img.parentElement !== li) li.insertBefore(img, li.firstChild);
+    } else if (img.parentElement !== stepImagesHost) {
+      // restore in index order, ahead of the counter
+      stepImagesHost.insertBefore(img, stepCounterEl);
+    }
+  });
+}
+placeStepImages();
+inlineSteps.addEventListener('change', placeStepImages);
 
 // For each pair of consecutive anchors, progress is how far the scroll
 // position has moved from anchor A crossing the reading line to anchor B
@@ -864,7 +902,9 @@ function updateStepCounter() {
 function updateSteps() {
   const rect = processSection.getBoundingClientRect();
   const inView = rect.top < innerHeight * 0.9 && rect.bottom > innerHeight * 0.1;
-  stagewrapEl.classList.toggle('mode-images', inView);
+  // Only swap the stage over to photos while the stage is actually the thing
+  // showing them; with inline photos the stage stays on the 3D model.
+  stagewrapEl.classList.toggle('mode-images', inView && !inlineSteps.matches);
 
   const trigger = innerHeight * 0.5;
   let closest = 0, closestDist = Infinity;
@@ -874,7 +914,8 @@ function updateSteps() {
     if (d < closestDist) { closestDist = d; closest = idx; }
   });
   activeStepIndex = closest;
-  stepLis.forEach((li, idx) => li.classList.toggle('active', inView && idx === closest));
+  const dim = !inlineSteps.matches;
+  stepLis.forEach((li, idx) => li.classList.toggle('active', !dim || (inView && idx === closest)));
   stepImages.forEach((img, idx) => img.classList.toggle('active', idx === closest));
   updateStepCounter();
 }
@@ -904,6 +945,12 @@ function resize() {
   camera.aspect = w / Math.max(1, h);
   camera.updateProjectionMatrix();
   if (typeof updateFraming === 'function') updateFraming();
+  // Driven from here as well as from the matchMedia listener: the media-query
+  // 'change' event was observed not to fire on every crossing, which left the
+  // photos stranded in the hidden stage container and the process section with
+  // no images at all. placeStepImages() is idempotent, so calling it on every
+  // resize is free insurance.
+  placeStepImages();
 }
 
 // ANCHOR_KEYS distances are framed for the tall desktop stage (aspect ~0.8),
@@ -936,8 +983,19 @@ function updateFraming() {
   distMul = Math.min(1, Math.max(0.45, (REF_ASPECT / a) / (1 - coverFrac)));
 }
 
+// Once the stage scrolls away on a phone there is nothing to draw, so stop
+// drawing: a WebGL loop running behind the fold is pure battery burn.
+let stageVisible = true;
+if ('IntersectionObserver' in window) {
+  new IntersectionObserver(
+    (entries) => { stageVisible = entries[0].isIntersecting; },
+    { rootMargin: '120px' }
+  ).observe(stagewrapEl);
+}
+
 let idle = 0;
 function frame() {
+  if (!stageVisible) { requestAnimationFrame(frame); return; }
   idle += 0.006;
   state.az = lerp(state.az, target.az, 0.07);
   state.el = lerp(state.el, target.el, 0.07);
