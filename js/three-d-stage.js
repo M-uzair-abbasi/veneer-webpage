@@ -19,7 +19,7 @@
       bottom: 16px;
       display: flex;
       gap: 8px;
-      font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .toolbar button {
       appearance: none;
@@ -42,7 +42,7 @@
       left: 16px;
       bottom: 16px;
       max-width: 60%;
-      font: 400 12px/1.5 'Instrument Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font: 400 12px/1.5 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: rgba(11, 30, 44, 0.55);
       user-select: none;
     }
@@ -53,7 +53,7 @@
       align-items: center;
       justify-content: center;
       padding: 24px;
-      font: 500 14px/1.6 'Instrument Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font: 500 14px/1.6 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: #8a2f20;
       text-align: center;
       white-space: pre-line;
