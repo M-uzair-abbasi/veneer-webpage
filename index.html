@@ -274,15 +274,15 @@
        top and everything scrolls past it - it reads as broken rather than as
        a fixed viewport. Let it scroll away with the hero instead, the way any
        ordinary page behaves, and give every section the whole screen. */
-    /* relative, NOT static: .stage3d and .stepImages are absolutely positioned
-       with inset:0, so the stage has to stay their containing block. Made it
-       static once and the canvas escaped to fill the whole page, rendering the
-       model straight through the hero copy. relative still scrolls normally. */
-    .stagewrap { position: relative; height: 46svh; order: -1;
-      background: var(--paper); z-index: auto; }
-    /* One section per screen, as on a laptop. svh (not vh) so a collapsing
-       mobile URL bar can never crop the bottom of a section. */
-    .block { min-height: calc(100svh - var(--hdr, 57px)); padding: 40px 0; max-width: none; }
+    /* Pinned, like the main site's hero-stage (sticky top-0 h-[100svh]). It has
+       to stay on screen for the scroll-driven animation to be seen at all -
+       unpinned it scrolls away after the hero and the veneers never seat.
+       z-index because .block is position:relative for its ambient pool, so
+       without it the copy paints over the stage. Sits under header.top (5). */
+    .stagewrap { position: sticky; top: 0; height: 38svh; order: -1;
+      background: var(--paper); z-index: 2; }
+    /* svh, not vh, so a collapsing URL bar can never crop a section. */
+    .block { min-height: 62svh; padding: 30px 0; max-width: none; }
     .caption, .scalebar, .hint, .stepCounter { display: none; }
 
     /* The stacked overlay set belongs to the sticky stage. With the stage gone
@@ -308,30 +308,27 @@
     .btnSm { font-size: 11px; padding: 8px 10px; }
     .btnIcon { width: 36px; height: 36px; }
 
-    /* Phone type scale. A phone column is ~30% narrower than the laptop copy
-       column, so the same words wrap into far more lines; without this the
-       sections that fit one laptop screen would each need two phone screens.
-       Nothing is removed - the wording is identical, only set tighter. */
-    body { font-size: 16.5px; line-height: 1.56; }
-    .eyebrow { font-size: 11px; margin: 0 0 16px; }
-    h1 { font-size: 34px; margin: 0 0 18px; }
-    h2 { font-size: 24px; margin: 0 0 14px; }
-    p { margin: 0 0 16px; }
-    p.lead { font-size: 18px; }
-    .meta { gap: 26px; margin-top: 12px; padding-top: 18px; }
-    .meta b { font-size: 26px; }
-    .materials { gap: 14px; margin: 16px 0 2px; }
-    .material { padding-top: 10px; }
-    .materialName { font-size: 20px; margin: 0 0 5px; }
-    .materialLead { font-size: 10px; margin: 0 0 7px; }
-    .material p:last-child { font-size: 13.5px; }
-    .materialNote { margin-top: 11px; padding: 10px 12px; font-size: 12.5px; }
+    /* Phone type scale. Two things squeeze a section here: a phone column is
+       ~30% narrower than the laptop copy column, so identical wording wraps
+       into far more lines, AND the pinned stage takes a fixed slice off every
+       screen. Nothing is removed - the wording is identical, only set tighter. */
+    body { font-size: 15.5px; line-height: 1.5; }
+    .eyebrow { font-size: 10.5px; margin: 0 0 12px; }
+    h1 { font-size: 31px; margin: 0 0 14px; }
+    h2 { font-size: 22px; margin: 0 0 12px; }
+    p { margin: 0 0 13px; }
+    p.lead { font-size: 16.5px; }
+    .meta { gap: 22px; margin-top: 8px; padding-top: 14px; }
+    .meta b { font-size: 23px; }
+    .materials { gap: 12px; margin: 12px 0 0; }
+    .material { padding-top: 9px; }
+    .materialName { font-size: 19px; margin: 0 0 5px; }
+    .materialLead { font-size: 10px; margin: 0 0 6px; }
+    .material p:last-child { font-size: 13px; }
+    .materialNote { margin-top: 10px; padding: 9px 11px; font-size: 12.5px; }
 
-    .stagewrap { height: 42svh; }
-    .materials { gap: 16px; margin: 16px 0 0; }
-    .material { padding-top: 12px; }
-    .materialName { font-size: 21px; }
-    .material p:last-child { font-size: 14px; }
+    .stagewrap { height: 27svh; }
+    .block { min-height: 73svh; }
   }
 
   /* Narrow phones (<=400px): the Material section carries the most words of
@@ -339,37 +336,38 @@
      Everything below trims leading and spacing only; no wording is cut, so the
      section still reads in full on one screen like it does on a laptop. */
   @media (max-width: 400px) {
-    #material h2 { font-size: 23px; margin: 0 0 13px; }
-    #material > p { margin: 0 0 12px; }
-    .materials { gap: 10px; margin: 12px 0 0; }
-    .material { padding-top: 9px; }
-    .materialName { font-size: 20px; margin: 0 0 5px; }
-    .materialLead { font-size: 10px; margin: 0 0 6px; }
-    .material p:last-child { font-size: 14px; line-height: 1.48; }
-    .materialNote { margin-top: 10px; padding: 10px 12px; font-size: 13.5px; line-height: 1.48; }
+    p { margin: 0 0 10px; }
+    #material h2 { font-size: 21px; margin: 0 0 10px; }
+    #material > p { margin: 0 0 10px; }
+    .materials { gap: 8px; margin: 9px 0 0; }
+    .material { padding-top: 7px; }
+    .materialName { font-size: 18px; margin: 0 0 4px; }
+    .materialLead { font-size: 9.5px; margin: 0 0 5px; }
+    .material p:last-child { font-size: 12.5px; line-height: 1.42; }
+    .materialNote { margin-top: 7px; padding: 7px 10px; font-size: 12px; line-height: 1.44; }
   }
 
   /* Short phones (SE-class, <=720px tall) have the same words in far less
      room. Height is the binding constraint there, so this tier comes after the
      <=400px width tier and wins where the two overlap. */
   @media (max-width: 560px) and (max-height: 720px) {
-    .stagewrap { height: 36svh; }
-    .block { padding: 26px 0; }
-    body { font-size: 15.5px; line-height: 1.5; }
-    h1 { font-size: 30px; margin: 0 0 13px; }
-    h2 { font-size: 21px; margin: 0 0 11px; }
-    p { margin: 0 0 13px; }
-    p.lead { font-size: 16px; }
-    .eyebrow { margin: 0 0 11px; }
-    .meta b { font-size: 22px; }
-    #material h2 { font-size: 20px; margin: 0 0 10px; }
-    #material > p { margin: 0 0 11px; }
-    .materials { gap: 9px; margin: 10px 0 0; }
-    .material { padding-top: 7px; }
-    .materialName { font-size: 18px; margin: 0 0 4px; }
-    .materialLead { font-size: 9.5px; margin: 0 0 5px; }
-    .material p:last-child { font-size: 12.5px; line-height: 1.42; }
-    .materialNote { margin-top: 9px; padding: 9px 11px; font-size: 12px; line-height: 1.45; }
+    .stagewrap { height: 21svh; }
+    .block { min-height: 79svh; padding: 18px 0; }
+    body { font-size: 14.5px; line-height: 1.46; }
+    h1 { font-size: 27px; margin: 0 0 11px; }
+    h2 { font-size: 20px; margin: 0 0 10px; }
+    p { margin: 0 0 10px; }
+    p.lead { font-size: 15px; }
+    .eyebrow { margin: 0 0 9px; }
+    .meta b { font-size: 20px; }
+    #material h2 { font-size: 19px; margin: 0 0 9px; }
+    #material > p { margin: 0 0 9px; }
+    .materials { gap: 7px; margin: 8px 0 0; }
+    .material { padding-top: 6px; }
+    .materialName { font-size: 17px; margin: 0 0 3px; }
+    .materialLead { font-size: 9.5px; margin: 0 0 4px; }
+    .material p:last-child { font-size: 12px; line-height: 1.4; }
+    .materialNote { margin-top: 6px; padding: 6px 9px; font-size: 11.5px; line-height: 1.4; }
     ol.steps li > img { height: 170px; }
   }
 </style>
@@ -891,6 +889,26 @@ const stepCounterEl = document.getElementById('stepCounter');
 const stepImagesHost = document.getElementById('stepImages');
 let activeStepIndex = 0;
 
+// Stable viewport height for every scroll threshold below.
+//
+// window.innerHeight shrinks and grows as the mobile URL bar collapses during
+// an ordinary scroll, while the stage is sized in svh and does not move.
+// Deriving the trigger line from the window therefore slides the camera against
+// a backdrop that has not moved - the jitter you feel scrolling on a phone.
+// This is the same fix the main site applies in ToothJourney: measure the unit
+// the stage is actually sized in, not the window. The probe is one hidden
+// element sized 100svh; if a browser lacks svh it reports 0 and we fall back.
+const vpProbe = document.createElement('div');
+vpProbe.setAttribute('aria-hidden', 'true');
+vpProbe.style.cssText =
+  'position:absolute;top:0;left:0;width:0;height:100svh;pointer-events:none;visibility:hidden';
+document.body.appendChild(vpProbe);
+let vpH = window.innerHeight;
+function measureViewport() {
+  vpH = vpProbe.getBoundingClientRect().height || window.innerHeight;
+}
+measureViewport();
+
 // On a phone the stage is not sticky - it scrolls away with the hero (see the
 // max-width:900px rules). The step photos live inside the stage, so they would
 // scroll away with it and never be seen next to the step they illustrate.
@@ -916,7 +934,7 @@ inlineSteps.addEventListener('change', placeStepImages);
 // position has moved from anchor A crossing the reading line to anchor B
 // crossing it — robust regardless of how tall any given section is.
 function anchorProgress() {
-  const trigger = innerHeight * 0.5;
+  const trigger = vpH * 0.5;
   const tops = anchors.map((el) => el.getBoundingClientRect().top);
   let i = 0;
   for (let k = 0; k < tops.length; k++) {
@@ -937,12 +955,12 @@ function updateStepCounter() {
 // sync with whichever step is nearest the reading line.
 function updateSteps() {
   const rect = processSection.getBoundingClientRect();
-  const inView = rect.top < innerHeight * 0.9 && rect.bottom > innerHeight * 0.1;
+  const inView = rect.top < vpH * 0.9 && rect.bottom > vpH * 0.1;
   // Only swap the stage over to photos while the stage is actually the thing
   // showing them; with inline photos the stage stays on the 3D model.
   stagewrapEl.classList.toggle('mode-images', inView && !inlineSteps.matches);
 
-  const trigger = innerHeight * 0.5;
+  const trigger = vpH * 0.5;
   let closest = 0, closestDist = Infinity;
   stepLis.forEach((li, idx) => {
     const r = li.getBoundingClientRect();
@@ -980,6 +998,7 @@ function resize() {
   renderer.setSize(w, h, false);
   camera.aspect = w / Math.max(1, h);
   camera.updateProjectionMatrix();
+  measureViewport();
   if (typeof updateFraming === 'function') updateFraming();
   // Driven from here as well as from the matchMedia listener: the media-query
   // 'change' event was observed not to fire on every crossing, which left the
@@ -1004,6 +1023,15 @@ const REF_ASPECT = 0.8;
 const HALF_FOV_TAN = Math.tan(38 * Math.PI / 360);
 let coverFrac = 0, distMul = 1;
 
+/* Continuous portrait factor, 0 = wide/landscape stage, 1 = tall/portrait,
+   measured on the STAGE and not the window (same reason as vpH above). The
+   main site derives its tooth framing this way rather than from a hard 768px
+   breakpoint, so tablets and odd ratios cross over smoothly instead of
+   snapping, and a short landscape phone never crops. */
+function portraitFactor(aspect) {
+  return Math.min(1, Math.max(0, (1.2 - aspect) / 0.9));
+}
+
 function updateFraming() {
   const band = canvas.clientHeight || 1;
   const hdr = document.querySelector('header.top');
@@ -1016,7 +1044,15 @@ function updateFraming() {
   // Desktop's 65px over a 900px stage is negligible; don't disturb that framing.
   coverFrac = f < 0.12 ? 0 : Math.min(f, 0.45);
   const a = Math.max(0.35, camera.aspect || REF_ASPECT);
-  distMul = Math.min(1, Math.max(0.45, (REF_ASPECT / a) / (1 - coverFrac)));
+  // Blend between the two things that can limit the arch: on a WIDE stage it is
+  // the frame height (pull in proportionally to aspect), on a TALL stage it is
+  // the frame width (the desktop framing the anchors were authored against).
+  // Interpolating on the portrait factor keeps the arch the same visual size
+  // through every ratio instead of jumping at a breakpoint.
+  const pf = portraitFactor(a);
+  const wide = REF_ASPECT / a;
+  const fit = wide + (1 - wide) * pf;
+  distMul = Math.min(1, Math.max(0.45, fit / (1 - coverFrac)));
 }
 
 // Once the stage scrolls away on a phone there is nothing to draw, so stop
@@ -1063,7 +1099,7 @@ const blocks = [...document.querySelectorAll('.block'), document.getElementById(
 function reveal() {
   for (const b of blocks) {
     const r = b.getBoundingClientRect();
-    b.classList.toggle('in', r.top < innerHeight * 0.82 && r.bottom > innerHeight * 0.14);
+    b.classList.toggle('in', r.top < vpH * 0.82 && r.bottom > vpH * 0.14);
   }
 }
 addEventListener('scroll', reveal, { passive: true });
