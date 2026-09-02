@@ -238,7 +238,11 @@
 
   @media (max-width: 900px) {
     .shell { grid-template-columns: 1fr; }
-    .stagewrap { height: 52vh; order: -1; background: var(--paper); }
+    /* Stage pins to the top and the copy scrolls beneath it. z-index is
+       required, not cosmetic: .block is position:relative (for its ambient
+       ::before pool), so without this the copy paints OVER the sticky stage
+       and the 3D model bleeds through the text. Stays under header.top (5). */
+    .stagewrap { height: 52vh; order: -1; background: var(--paper); z-index: 2; }
     .block { min-height: 78vh; padding: 64px 0; max-width: none; }
     .caption, .scalebar, .hint, .stepCounter { display: none; }
     .baGrid img { height: 150px; }
