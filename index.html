@@ -242,8 +242,11 @@
        required, not cosmetic: .block is position:relative (for its ambient
        ::before pool), so without this the copy paints OVER the sticky stage
        and the 3D model bleeds through the text. Stays under header.top (5). */
-    .stagewrap { height: 52vh; order: -1; background: var(--paper); z-index: 2; }
-    .block { min-height: 78vh; padding: 64px 0; max-width: none; }
+    .stagewrap { height: 34svh; order: -1; background: var(--paper); z-index: 2; }
+    /* One section per screen, as on a laptop: the stage takes a fixed slice of
+       the viewport and each block gets exactly what's left. svh (not vh) so a
+       collapsing mobile URL bar can never crop the bottom of a section. */
+    .block { min-height: 66svh; padding: 34px 0; max-width: none; }
     .caption, .scalebar, .hint, .stepCounter { display: none; }
     .baGrid img { height: 150px; }
     .materials { grid-template-columns: 1fr; gap: 24px; }
@@ -259,6 +262,64 @@
     .footInner { grid-template-columns: 1fr; gap: 30px; }
     .btnSm { font-size: 11px; padding: 8px 10px; }
     .btnIcon { width: 36px; height: 36px; }
+
+    /* Phone type scale. A phone column is ~30% narrower than the laptop copy
+       column, so the same words wrap into far more lines; without this the
+       sections that fit one laptop screen would each need two phone screens.
+       Nothing is removed - the wording is identical, only set tighter. */
+    body { font-size: 15.5px; line-height: 1.5; }
+    .eyebrow { font-size: 10.5px; margin: 0 0 12px; }
+    h1 { font-size: 37px; margin: 0 0 16px; }
+    h2 { font-size: 25px; margin: 0 0 12px; }
+    p { margin: 0 0 13px; }
+    p.lead { font-size: 16.5px; }
+    .meta { gap: 22px; margin-top: 8px; padding-top: 14px; }
+    .meta b { font-size: 23px; }
+    .materials { gap: 14px; margin: 16px 0 2px; }
+    .material { padding-top: 10px; }
+    .materialName { font-size: 20px; margin: 0 0 5px; }
+    .materialLead { font-size: 10px; margin: 0 0 7px; }
+    .material p:last-child { font-size: 13.5px; }
+    .materialNote { margin-top: 11px; padding: 10px 12px; font-size: 12.5px; }
+
+    /* A phone has no side column, so the stage costs vertical space a laptop
+       never pays. Keep it to roughly a quarter of the screen so the section
+       below it can be read in full without scrolling. */
+    .stagewrap { height: 27svh; }
+    .block { min-height: 73svh; padding: 26px 0; }
+    .materials { gap: 12px; margin: 12px 0 0; }
+    .material { padding-top: 8px; }
+    .materialName { font-size: 19px; }
+    .material p:last-child { font-size: 13px; }
+  }
+
+  /* Short phones (SE-class, <=700px tall) have the same words but far less
+     room, so the stage shrinks again and the scale steps down once more. */
+  @media (max-width: 560px) and (max-height: 720px) {
+    .stagewrap { height: 20svh; }
+    .block { min-height: 80svh; padding: 20px 0; }
+    body { font-size: 14.5px; line-height: 1.46; }
+    h1 { font-size: 31px; margin: 0 0 12px; }
+    h2 { font-size: 22px; margin: 0 0 10px; }
+    p { margin: 0 0 11px; }
+    p.lead { font-size: 15px; }
+    .eyebrow { margin: 0 0 9px; }
+    .meta b { font-size: 20px; }
+  }
+
+  /* Narrow phones (<=400px): the Material section carries the most words of
+     any single screen - an intro, two stacked materials and the no-prep note.
+     Everything below trims leading and spacing only; no wording is cut, so the
+     section still reads in full on one screen like it does on a laptop. */
+  @media (max-width: 400px) {
+    #material h2 { font-size: 23px; margin: 0 0 10px; }
+    #material > p { margin: 0 0 11px; }
+    .materials { gap: 8px; margin: 10px 0 0; }
+    .material { padding-top: 6px; }
+    .materialName { font-size: 18px; margin: 0 0 4px; }
+    .materialLead { font-size: 9.5px; margin: 0 0 5px; }
+    .material p:last-child { font-size: 12.5px; line-height: 1.42; }
+    .materialNote { margin-top: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.45; }
   }
 </style>
 </head>
