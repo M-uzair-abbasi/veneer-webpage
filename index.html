@@ -205,12 +205,34 @@
      stage is our single image slot, so the format differs - a stack of step
      rows over the stage rather than their list-left / image-right pair - while
      the behaviour matches. */
-  ol.steps { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 7px; }
-  ol.steps li { display: grid; grid-template-columns: 38px 1fr; gap: 14px; align-items: start;
-    padding: 11px 14px; border-radius: 16px;
+  ol.steps { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 5px; }
+  ol.steps li { display: block; }
+  .stepBtn { display: grid; grid-template-columns: 38px 1fr; gap: 14px; align-items: start;
+    width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer;
+    padding: 9px 14px; border-radius: 16px;
     background: transparent; border: 1px solid transparent;
-    transition: background .3s ease, border-color .3s ease; }
-  li.active { background: var(--card); border-color: color-mix(in srgb, var(--accent) 38%, transparent); }
+    transition: background .2s ease, border-color .2s ease; }
+  .stepBtn:hover { background: color-mix(in srgb, var(--card) 65%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 20%, transparent); }
+  li.active .stepBtn { background: var(--card);
+    border-color: color-mix(in srgb, var(--accent) 38%, transparent); }
+  .stepBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* arrows + dots: either moves the image, and the step list follows */
+  .stepNav { display: flex; align-items: center; gap: 14px; margin-top: 10px; padding-left: 14px; }
+  .stepArrow { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 auto;
+    border-radius: 50%; border: 1px solid var(--line); background: transparent;
+    color: var(--ink); font: inherit; font-size: 17px; line-height: 1; cursor: pointer;
+    transition: background .2s ease, border-color .2s ease, color .2s ease; }
+  .stepArrow:hover { background: var(--card); border-color: color-mix(in srgb, var(--accent) 40%, transparent); color: var(--accent); }
+  .stepArrow:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .stepDots { display: flex; align-items: center; gap: 7px; }
+  .stepDot { height: 8px; width: 8px; padding: 0; border: 0; border-radius: 999px; cursor: pointer;
+    background: color-mix(in srgb, var(--ink) 22%, transparent);
+    transition: width .25s ease, background .25s ease; }
+  .stepDot:hover { background: color-mix(in srgb, var(--ink) 42%, transparent); }
+  .stepDot.on { width: 22px; background: var(--accent); }
+  .stepDot:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   ol.steps i { font-style: normal; font-family: 'Space Grotesk', system-ui, sans-serif;
     font-weight: 700; font-size: 13px; display: grid; place-items: center;
     width: 38px; height: 38px; border-radius: 50%;
@@ -279,10 +301,12 @@
       linear-gradient(to top, rgba(239,236,229,.6) 0%, transparent 34%),
       radial-gradient(120% 90% at 60% 40%, transparent 45%, rgba(239,236,229,.4) 100%); }
   .stepImages img.active { opacity: 1; }
-  .stepCounter { position: absolute; left: 50%; bottom: 34px; transform: translateX(-50%);
-    font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink);
-    background: rgba(246, 243, 236, 0.82); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    border: 1px solid var(--line); padding: 7px 16px; }
+  /* caption over the image slot: "01 / 05 · Title", on a gradient like the
+     main site's from-deep/80 via-deep/35 overlay */
+  .stepCounter { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+    margin: 0; padding: 34px 18px 14px; pointer-events: none;
+    font-size: 13.5px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums;
+    background: linear-gradient(to top, rgba(11, 30, 44, .82), rgba(11, 30, 44, .34) 46%, transparent); }
   .stagewrap.mode-images .stage3d { opacity: 0; pointer-events: none; }
   .stagewrap.mode-images .stepImages { opacity: 1; pointer-events: auto; }
 
@@ -340,25 +364,17 @@
        by 4svh). */
     .block { min-height: 100svh; justify-content: flex-end;
       padding: 27svh 0 6svh; max-width: none; }
-    /* The stage is pinned full-height so the model can hold the centre and the
-       copy can travel past it - but the IMAGERY must not fill the screen. The
-       step photo is a framed plate in the upper area, not a full-bleed
-       background with text sitting on it. */
-    .stepImages { top: calc(var(--hdr, 57px) + 12px); left: 16px; right: 16px;
-      height: 32svh; border-radius: 16px; overflow: hidden;
-      border: 1px solid var(--line); }
-    /* The other sections hang their copy off the BOTTOM of the screen, which is
-       what keeps the model clear above them. The process section is taller than
-       a screen once every step keeps its text, so hanging it from the bottom
-       drove it straight up through the photo. It starts from the top instead,
-       below the plate. */
-    #process { justify-content: flex-start; padding-top: 44svh; padding-bottom: 8svh; }
-    .stepImages::after { border-radius: 16px;
-      background: linear-gradient(to top, rgba(11, 30, 44, .18), transparent 42%); }
-    .stagewrap.mode-images::after {
-      background: linear-gradient(to top,
-        var(--paper) 0%, var(--paper) 52%, rgba(239, 236, 229, .72) 62%,
-        transparent 76%); }
+    /* Phone: the gallery stacks - image above, steps below - which is the same
+       relationship as the laptop's left/right, folded. The slot scrolls with
+       the section; pinned in the stage it sat still while the steps ran under
+       it. The process section starts from the top for the same reason it is
+       taller than one screen. */
+    #process { justify-content: flex-start; padding-top: 16svh; padding-bottom: 8svh; }
+    .stepFigure { position: relative; width: 100%; aspect-ratio: 4 / 3;
+      margin: 4px 0 6px; border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--line); background: var(--paper-2); }
+    .stepFigure .stepImages { position: absolute; inset: 0; opacity: 1; pointer-events: auto; }
+    .stepFigure .stepImages::after { background: none; }
 
     /* Paper rising from the bottom so copy over the stage keeps its contrast -
        the main site's equivalent is the inset-x-0 bottom-0 h-[38%] paper
@@ -368,7 +384,7 @@
         var(--paper) 0%, var(--paper) 33%,
         rgba(239, 236, 229, .88) 47%,
         rgba(239, 236, 229, .40) 63%, transparent 80%); }
-    .caption, .scalebar, .hint, .stepCounter { display: none; }
+    .caption, .scalebar, .hint { display: none; }
 
     /* Steps, in the main site's format (components/home/FirstVisit.tsx):
        a compact card grid on phones - "MOBILE: 2x2 card grid (compact, fits
@@ -382,7 +398,9 @@
     /* Every step keeps its description - collapsing the inactive ones read as
        missing content rather than as focus. */
     ol.steps { gap: 6px; margin-top: 12px; }
-    ol.steps li { grid-template-columns: 32px 1fr; gap: 12px; padding: 10px 12px; border-radius: 13px; }
+    .stepBtn { grid-template-columns: 32px 1fr; gap: 12px; padding: 10px 12px; border-radius: 13px; }
+    .stepNav { margin-top: 12px; padding-left: 12px; }
+    .stepCounter { padding: 26px 14px 11px; font-size: 12.5px; }
     ol.steps i { width: 32px; height: 32px; font-size: 12.5px; }
     ol.steps h3 { margin: 6px 0 0; font-size: 14.5px; }
     ol.steps p { margin: 4px 0 0; font-size: 13.5px; line-height: 1.45; }
@@ -514,13 +532,19 @@
 
     <section class="block" id="process">
       <h2 data-i18n="process.h2">Fünf Schritte, ein Ergebnis.</h2>
+      <div class="stepFigure" id="stepFigure"></div>
       <ol class="steps">
-        <li class="active"><i>01</i><div data-i18n="process.step1"><h3>Wunsch und Farbwahl</h3><p>Am Anfang steht ein Gespräch: Was genau soll sich verändern? Passend dazu wählen wir den Farbton – anhand von Mustern, die wir direkt neben Ihre eigenen Zähne halten.</p></div></li>
-        <li><i>02</i><div data-i18n="process.step2"><h3>Formvorbereitung</h3><p>Für die Schale braucht der Zahn ein wenig Platz. Meist genügt eine hauchdünne Schicht des äußeren Schmelzes, bei sehr dünnen Veneers manchmal gar keine – betäubt spüren Sie davon nichts.</p></div></li>
-        <li><i>03</i><div data-i18n="process.step3"><h3>Abdruck und Modell</h3><p>Ein digitaler Scanner oder eine klassische Abformung hält die genaue Form Ihrer Zähne fest. Aus diesen Daten fertigt ein Speziallabor jede Schale auf den Zehntelmillimeter genau.</p></div></li>
-        <li><i>04</i><div data-i18n="process.step4"><h3>Einprobe und Verklebung</h3><p>Bevor geklebt wird, wird probiert: Sitz, Farbe und Übergänge werden mit Wasser geprüft. Erst wenn alles passt, wird der Zahn getrocknet, angeätzt und die Schale dauerhaft verklebt.</p></div></li>
-        <li><i>05</i><div data-i18n="process.step5"><h3>Feinschliff und Nachsorge</h3><p>Zum Schluss werden Ränder und Biss kontrolliert und letzte Kanten poliert. Wir zeigen Ihnen außerdem, wie Sie Ihre neuen Veneers im Alltag pflegen, damit sie lange schön bleiben.</p></div></li>
+        <li class="active"><button type="button" class="stepBtn" aria-pressed="true"><i>01</i><div data-i18n="process.step1"><h3>Wunsch und Farbwahl</h3><p>Am Anfang steht ein Gespräch: Was genau soll sich verändern? Passend dazu wählen wir den Farbton – anhand von Mustern, die wir direkt neben Ihre eigenen Zähne halten.</p></div></button></li>
+        <li><button type="button" class="stepBtn" aria-pressed="false"><i>02</i><div data-i18n="process.step2"><h3>Formvorbereitung</h3><p>Für die Schale braucht der Zahn ein wenig Platz. Meist genügt eine hauchdünne Schicht des äußeren Schmelzes, bei sehr dünnen Veneers manchmal gar keine – betäubt spüren Sie davon nichts.</p></div></button></li>
+        <li><button type="button" class="stepBtn" aria-pressed="false"><i>03</i><div data-i18n="process.step3"><h3>Abdruck und Modell</h3><p>Ein digitaler Scanner oder eine klassische Abformung hält die genaue Form Ihrer Zähne fest. Aus diesen Daten fertigt ein Speziallabor jede Schale auf den Zehntelmillimeter genau.</p></div></button></li>
+        <li><button type="button" class="stepBtn" aria-pressed="false"><i>04</i><div data-i18n="process.step4"><h3>Einprobe und Verklebung</h3><p>Bevor geklebt wird, wird probiert: Sitz, Farbe und Übergänge werden mit Wasser geprüft. Erst wenn alles passt, wird der Zahn getrocknet, angeätzt und die Schale dauerhaft verklebt.</p></div></button></li>
+        <li><button type="button" class="stepBtn" aria-pressed="false"><i>05</i><div data-i18n="process.step5"><h3>Feinschliff und Nachsorge</h3><p>Zum Schluss werden Ränder und Biss kontrolliert und letzte Kanten poliert. Wir zeigen Ihnen außerdem, wie Sie Ihre neuen Veneers im Alltag pflegen, damit sie lange schön bleiben.</p></div></button></li>
       </ol>
+      <div class="stepNav">
+        <button type="button" class="stepArrow" id="stepPrev" data-i18n-aria="steps.prev">&#8249;</button>
+        <div class="stepDots" id="stepDots"></div>
+        <button type="button" class="stepArrow" id="stepNext" data-i18n-aria="steps.next">&#8250;</button>
+      </div>
     </section>
 
     <section class="block" data-anchor id="crown">
@@ -564,7 +588,7 @@
       <img src="assets/steps/3-planung.jpg" data-i18n-alt="process.step3Alt" alt="">
       <img src="assets/steps/4-befestigung.jpg" data-i18n-alt="process.step4Alt" alt="">
       <img src="assets/steps/5-kontrolle.jpg" data-i18n-alt="process.step5Alt" alt="">
-      <div class="stepCounter" id="stepCounter">1 / 5</div>
+      <figcaption class="stepCounter" id="stepCounter"></figcaption>
     </div>
   </div>
 </div>
@@ -777,6 +801,7 @@ const I18N = {
       'Bereit, wenn Sie es sind',
     ],
     stepCounter: (n) => `Schritt ${n} von 5`,
+    steps: { prev: 'Vorheriger Schritt', next: 'N\u00e4chster Schritt' },
     footer: {
       langs: 'Wir sprechen Deutsch, Englisch, Farsi, T\u00fcrkisch und Arabisch.',
       fax: 'Fax 0241 4018150',
@@ -866,6 +891,7 @@ const I18N = {
       'Ready when you are',
     ],
     stepCounter: (n) => `Step ${n} of 5`,
+    steps: { prev: 'Previous step', next: 'Next step' },
     footer: {
       langs: 'We speak German, English, Farsi, Turkish and Arabic.',
       fax: 'Fax 0241 4018150',
@@ -983,28 +1009,78 @@ function anchorProgress() {
 }
 
 function updateStepCounter() {
-  stepCounterEl.textContent = I18N[currentLang].stepCounter(activeStepIndex + 1);
+  const h = stepLis[activeStepIndex] && stepLis[activeStepIndex].querySelector('h3');
+  const n = String(activeStepIndex + 1).padStart(2, '0');
+  stepCounterEl.textContent = `${n} / ${String(stepLis.length).padStart(2, '0')} \u00b7 ` + (h ? h.textContent : '');
+  stepCounterEl.setAttribute('aria-label', I18N[currentLang].stepCounter(activeStepIndex + 1));
 }
 
 // Swaps the pinned stage between the 3D model and the step photos, and
 // keeps both the active photo and the dimmed/highlighted step text in
 // sync with whichever step is nearest the reading line.
+/* The veneers page's StepImageGallery, ported: ONE `active` index drives the
+   step list, the image slot, the caption and the dots, so every control moves
+   the other two. Click a step and its photo swaps in; move the photo with the
+   arrows or dots and the step follows. The image slot is the stage - the right
+   column on a laptop, the framed plate above the steps on a phone - which is
+   the same left-steps / right-image relationship in both. Click-driven, like
+   the original; scrolling no longer changes the step under the reader. */
+// The image slot lives in two places. On a laptop it is the right-hand stage
+// column, which IS the "images on the right" half of the gallery. On a phone
+// there is no second column, so it has to travel with the section - pinned in
+// the sticky stage it stayed put while the step list scrolled underneath it.
+// Driven from resize(), not a matchMedia listener: the media query's change
+// event was seen to miss crossings earlier in this file's history.
+const stepFigureEl = document.getElementById('stepFigure');
+const stepImagesEl = document.getElementById('stepImages');
+const galleryStacks = window.matchMedia('(max-width: 900px)');
+function placeStepSlot() {
+  const host = galleryStacks.matches ? stepFigureEl : stagewrapEl;
+  if (stepImagesEl.parentElement !== host) host.appendChild(stepImagesEl);
+}
+placeStepSlot();
+
+const stepDotsEl = document.getElementById('stepDots');
+const stepDots = stepLis.map((li, i) => {
+  const d = document.createElement('button');
+  d.type = 'button';
+  d.className = 'stepDot';
+  d.addEventListener('click', () => setStep(i));
+  stepDotsEl.appendChild(d);
+  return d;
+});
+
+function setStep(idx) {
+  activeStepIndex = (idx + stepLis.length) % stepLis.length;   // wrap, as on the main site
+  stepLis.forEach((li, i) => {
+    const on = i === activeStepIndex;
+    li.classList.toggle('active', on);
+    const btn = li.querySelector('.stepBtn');
+    if (btn) btn.setAttribute('aria-pressed', String(on));
+  });
+  stepImages.forEach((img, i) => img.classList.toggle('active', i === activeStepIndex));
+  stepDots.forEach((d, i) => {
+    d.classList.toggle('on', i === activeStepIndex);
+    d.setAttribute('aria-pressed', String(i === activeStepIndex));
+  });
+  updateStepCounter();
+}
+
+stepLis.forEach((li, i) => {
+  const btn = li.querySelector('.stepBtn');
+  if (btn) btn.addEventListener('click', () => setStep(i));
+});
+document.getElementById('stepPrev').addEventListener('click', () => setStep(activeStepIndex - 1));
+document.getElementById('stepNext').addEventListener('click', () => setStep(activeStepIndex + 1));
+
 function updateSteps() {
   const rect = processSection.getBoundingClientRect();
   const inView = rect.top < vpH * 0.9 && rect.bottom > vpH * 0.1;
+  // Kept on for phones too. There the photos are no longer children of the
+  // stage, so `.stagewrap.mode-images .stepImages` matches nothing and only the
+  // useful half applies: the 3D model is hidden and the stage falls back to
+  // plain paper behind the step list, instead of the arch showing through it.
   stagewrapEl.classList.toggle('mode-images', inView);
-
-  const trigger = vpH * 0.5;
-  let closest = 0, closestDist = Infinity;
-  stepLis.forEach((li, idx) => {
-    const r = li.getBoundingClientRect();
-    const d = Math.abs((r.top + r.bottom) / 2 - trigger);
-    if (d < closestDist) { closestDist = d; closest = idx; }
-  });
-  activeStepIndex = closest;
-  stepLis.forEach((li, idx) => li.classList.toggle('active', inView && idx === closest));
-  stepImages.forEach((img, idx) => img.classList.toggle('active', idx === closest));
-  updateStepCounter();
 }
 
 function readScroll() {
@@ -1033,6 +1109,7 @@ function resize() {
   camera.updateProjectionMatrix();
   measureViewport();
   if (typeof updateFraming === 'function') updateFraming();
+  if (typeof placeStepSlot === 'function') placeStepSlot();
 }
 
 // ANCHOR_KEYS distances are framed for the tall desktop stage (aspect ~0.8),
@@ -1117,7 +1194,7 @@ function frame() {
 addEventListener('scroll', readScroll, { passive: true });
 addEventListener('resize', resize);
 applyLang(currentLang);
-resize(); readScroll(); frame();
+resize(); readScroll(); setStep(0); frame();
 
 // reveal copy from measured geometry (IntersectionObserver is unreliable
 // inside a clipped preview frame)
