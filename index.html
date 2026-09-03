@@ -206,16 +206,11 @@
      rows over the stage rather than their list-left / image-right pair - while
      the behaviour matches. */
   ol.steps { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 7px; }
-  ol.steps li { display: block; }
-  .stepBtn { display: grid; grid-template-columns: 38px 1fr; gap: 14px; align-items: start;
-    width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer;
+  ol.steps li { display: grid; grid-template-columns: 38px 1fr; gap: 14px; align-items: start;
     padding: 11px 14px; border-radius: 16px;
     background: transparent; border: 1px solid transparent;
-    transition: background .2s ease, border-color .2s ease; }
-  .stepBtn:hover { background: color-mix(in srgb, var(--card) 60%, transparent);
-    border-color: color-mix(in srgb, var(--accent) 20%, transparent); }
-  li.active .stepBtn { background: var(--card); border-color: color-mix(in srgb, var(--accent) 38%, transparent); }
-  .stepBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    transition: background .3s ease, border-color .3s ease; }
+  li.active { background: var(--card); border-color: color-mix(in srgb, var(--accent) 38%, transparent); }
   ol.steps i { font-style: normal; font-family: 'Space Grotesk', system-ui, sans-serif;
     font-weight: 700; font-size: 13px; display: grid; place-items: center;
     width: 38px; height: 38px; border-radius: 50%;
@@ -345,15 +340,25 @@
        by 4svh). */
     .block { min-height: 100svh; justify-content: flex-end;
       padding: 27svh 0 6svh; max-width: none; }
-    /* A photo is not paper. The 3D model sits on the shell colour, so a light
-       scrim is enough; step photography is mid-tone and full-bleed, so the copy
-       riding over it needs a far heavier one. */
+    /* The stage is pinned full-height so the model can hold the centre and the
+       copy can travel past it - but the IMAGERY must not fill the screen. The
+       step photo is a framed plate in the upper area, not a full-bleed
+       background with text sitting on it. */
+    .stepImages { top: calc(var(--hdr, 57px) + 12px); left: 16px; right: 16px;
+      height: 32svh; border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--line); }
+    /* The other sections hang their copy off the BOTTOM of the screen, which is
+       what keeps the model clear above them. The process section is taller than
+       a screen once every step keeps its text, so hanging it from the bottom
+       drove it straight up through the photo. It starts from the top instead,
+       below the plate. */
+    #process { justify-content: flex-start; padding-top: 44svh; padding-bottom: 8svh; }
+    .stepImages::after { border-radius: 16px;
+      background: linear-gradient(to top, rgba(11, 30, 44, .18), transparent 42%); }
     .stagewrap.mode-images::after {
       background: linear-gradient(to top,
-        var(--paper) 0%, var(--paper) 47%,
-        rgba(239, 236, 229, .93) 59%,
-        rgba(239, 236, 229, .58) 73%,
-        rgba(239, 236, 229, .18) 88%, transparent 100%); }
+        var(--paper) 0%, var(--paper) 52%, rgba(239, 236, 229, .72) 62%,
+        transparent 76%); }
 
     /* Paper rising from the bottom so copy over the stage keeps its contrast -
        the main site's equivalent is the inset-x-0 bottom-0 h-[38%] paper
@@ -374,16 +379,12 @@
        into each <li>, which is what made this section 2,200px tall.
        Steps stay lit here: at card size the dimmed-until-active treatment just
        looks like broken text. */
-    /* Progressive disclosure, straight from the main site's gallery: "show the
-       description only for the ACTIVE step so the list stays compact and the
-       section fits one phone screen". This is what finally lets the process
-       section - the one section that never fitted - hold a single screen. */
+    /* Every step keeps its description - collapsing the inactive ones read as
+       missing content rather than as focus. */
     ol.steps { gap: 6px; margin-top: 12px; }
-    .stepBtn { grid-template-columns: 32px 1fr; gap: 12px; padding: 10px 12px; border-radius: 13px; }
+    ol.steps li { grid-template-columns: 32px 1fr; gap: 12px; padding: 10px 12px; border-radius: 13px; }
     ol.steps i { width: 32px; height: 32px; font-size: 12.5px; }
     ol.steps h3 { margin: 6px 0 0; font-size: 14.5px; }
-    ol.steps li:not(.active) h3 { margin: 6px 0; }
-    ol.steps li:not(.active) p { display: none; }
     ol.steps p { margin: 4px 0 0; font-size: 13.5px; line-height: 1.45; }
     .baGrid img { height: 150px; }
     .materials { grid-template-columns: 1fr; gap: 24px; }
@@ -514,11 +515,11 @@
     <section class="block" id="process">
       <h2 data-i18n="process.h2">Fünf Schritte, ein Ergebnis.</h2>
       <ol class="steps">
-        <li class="active"><button type="button" class="stepBtn" aria-pressed="true"><i>01</i><div data-i18n="process.step1"><h3>Wunsch und Farbwahl</h3><p>Am Anfang steht ein Gespräch: Was genau soll sich verändern? Passend dazu wählen wir den Farbton – anhand von Mustern, die wir direkt neben Ihre eigenen Zähne halten.</p></div></button></li>
-        <li><button type="button" class="stepBtn" aria-pressed="false"><i>02</i><div data-i18n="process.step2"><h3>Formvorbereitung</h3><p>Für die Schale braucht der Zahn ein wenig Platz. Meist genügt eine hauchdünne Schicht des äußeren Schmelzes, bei sehr dünnen Veneers manchmal gar keine – betäubt spüren Sie davon nichts.</p></div></button></li>
-        <li><button type="button" class="stepBtn" aria-pressed="false"><i>03</i><div data-i18n="process.step3"><h3>Abdruck und Modell</h3><p>Ein digitaler Scanner oder eine klassische Abformung hält die genaue Form Ihrer Zähne fest. Aus diesen Daten fertigt ein Speziallabor jede Schale auf den Zehntelmillimeter genau.</p></div></button></li>
-        <li><button type="button" class="stepBtn" aria-pressed="false"><i>04</i><div data-i18n="process.step4"><h3>Einprobe und Verklebung</h3><p>Bevor geklebt wird, wird probiert: Sitz, Farbe und Übergänge werden mit Wasser geprüft. Erst wenn alles passt, wird der Zahn getrocknet, angeätzt und die Schale dauerhaft verklebt.</p></div></button></li>
-        <li><button type="button" class="stepBtn" aria-pressed="false"><i>05</i><div data-i18n="process.step5"><h3>Feinschliff und Nachsorge</h3><p>Zum Schluss werden Ränder und Biss kontrolliert und letzte Kanten poliert. Wir zeigen Ihnen außerdem, wie Sie Ihre neuen Veneers im Alltag pflegen, damit sie lange schön bleiben.</p></div></button></li>
+        <li class="active"><i>01</i><div data-i18n="process.step1"><h3>Wunsch und Farbwahl</h3><p>Am Anfang steht ein Gespräch: Was genau soll sich verändern? Passend dazu wählen wir den Farbton – anhand von Mustern, die wir direkt neben Ihre eigenen Zähne halten.</p></div></li>
+        <li><i>02</i><div data-i18n="process.step2"><h3>Formvorbereitung</h3><p>Für die Schale braucht der Zahn ein wenig Platz. Meist genügt eine hauchdünne Schicht des äußeren Schmelzes, bei sehr dünnen Veneers manchmal gar keine – betäubt spüren Sie davon nichts.</p></div></li>
+        <li><i>03</i><div data-i18n="process.step3"><h3>Abdruck und Modell</h3><p>Ein digitaler Scanner oder eine klassische Abformung hält die genaue Form Ihrer Zähne fest. Aus diesen Daten fertigt ein Speziallabor jede Schale auf den Zehntelmillimeter genau.</p></div></li>
+        <li><i>04</i><div data-i18n="process.step4"><h3>Einprobe und Verklebung</h3><p>Bevor geklebt wird, wird probiert: Sitz, Farbe und Übergänge werden mit Wasser geprüft. Erst wenn alles passt, wird der Zahn getrocknet, angeätzt und die Schale dauerhaft verklebt.</p></div></li>
+        <li><i>05</i><div data-i18n="process.step5"><h3>Feinschliff und Nachsorge</h3><p>Zum Schluss werden Ränder und Biss kontrolliert und letzte Kanten poliert. Wir zeigen Ihnen außerdem, wie Sie Ihre neuen Veneers im Alltag pflegen, damit sie lange schön bleiben.</p></div></li>
       </ol>
     </section>
 
@@ -988,36 +989,10 @@ function updateStepCounter() {
 // Swaps the pinned stage between the 3D model and the step photos, and
 // keeps both the active photo and the dimmed/highlighted step text in
 // sync with whichever step is nearest the reading line.
-// The main site's veneers page drives its step gallery by CLICK, not scroll:
-// each step is a real button and picking one cross-fades its photo into a
-// single slot. Here the stage IS that slot, so the same idea works - but
-// scroll still drives it until the reader takes over, and their pick is held
-// until they leave the section rather than being yanked back on the next
-// scroll event.
-let pickedStep = null;
-function setStep(idx, fromUser) {
-  if (fromUser) pickedStep = idx;
-  activeStepIndex = idx;
-  stepLis.forEach((li, i) => {
-    const on = i === idx;
-    li.classList.toggle('active', on);
-    const btn = li.querySelector('.stepBtn');
-    if (btn) btn.setAttribute('aria-pressed', String(on));
-  });
-  stepImages.forEach((img, i) => img.classList.toggle('active', i === idx));
-  updateStepCounter();
-}
-stepLis.forEach((li, idx) => {
-  const btn = li.querySelector('.stepBtn');
-  if (btn) btn.addEventListener('click', () => setStep(idx, true));
-});
-
 function updateSteps() {
   const rect = processSection.getBoundingClientRect();
   const inView = rect.top < vpH * 0.9 && rect.bottom > vpH * 0.1;
   stagewrapEl.classList.toggle('mode-images', inView);
-  if (!inView) { pickedStep = null; return; }
-  if (pickedStep !== null) { setStep(pickedStep, false); return; }
 
   const trigger = vpH * 0.5;
   let closest = 0, closestDist = Infinity;
@@ -1026,7 +1001,10 @@ function updateSteps() {
     const d = Math.abs((r.top + r.bottom) / 2 - trigger);
     if (d < closestDist) { closestDist = d; closest = idx; }
   });
-  setStep(closest, false);
+  activeStepIndex = closest;
+  stepLis.forEach((li, idx) => li.classList.toggle('active', inView && idx === closest));
+  stepImages.forEach((img, idx) => img.classList.toggle('active', idx === closest));
+  updateStepCounter();
 }
 
 function readScroll() {
