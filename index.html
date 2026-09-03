@@ -31,6 +31,7 @@
     --paper: #efece5;         /* --color-shell   — page + stage background */
     --paper-2: #e7e2d8;       /* --color-shell-2 — ghost-button hover */
     --card: #f6f3ec;          /* --color-card    — lifted surfaces */
+    --foam: #d8e8f8;          /* --color-foam    — soft blue chip fill */
     --ink: #0b1e2c;           /* --color-deep    — headings, strong text */
     --ink-soft: #4f6678;      /* --color-muted   — eyebrows, captions, secondary */
     --line: rgba(11, 30, 44, 0.14);
@@ -310,29 +311,64 @@
 
   @media (max-width: 900px) {
     .shell { grid-template-columns: 1fr; }
-    /* A phone has no side column, so a sticky stage just parks itself at the
-       top and everything scrolls past it - it reads as broken rather than as
-       a fixed viewport. Let it scroll away with the hero instead, the way any
-       ordinary page behaves, and give every section the whole screen. */
-    /* Pinned, like the main site's hero-stage (sticky top-0 h-[100svh]). It has
-       to stay on screen for the scroll-driven animation to be seen at all -
-       unpinned it scrolls away after the hero and the veneers never seat.
-       z-index because .block is position:relative for its ambient pool, so
-       without it the copy paints over the stage. Sits under header.top (5). */
-    .stagewrap { position: sticky; top: 0; height: 38svh; order: -1;
-      background: var(--paper); z-index: 2; }
-    /* svh, not vh, so a collapsing URL bar can never crop a section. */
-    .block { min-height: 62svh; padding: 30px 0; max-width: none; }
+    /* The main site's journey model, exactly: a FULL-SCREEN sticky stage
+       (hero-stage sticky top-0 h-[100svh]) with the narrative pulled back over
+       it (-mt-[100svh] at z-10), each act one screen tall. The model therefore
+       stays CENTRED and animating the whole way down while the copy travels
+       around it, instead of sitting in a band at the top that the page scrolls
+       past. z-order: stage 1, copy 2, header 5. */
+    .stagewrap { position: sticky; top: 0; height: 100svh; order: -1;
+      background: var(--paper); z-index: 1; }
+    .copy { margin-top: -100svh; position: relative; z-index: 2; }
+    /* Copy sits low so the model reads above it - the main site does the same
+       on phones (the act carries pt-[14svh] pb-24, the poster is nudged down
+       by 4svh). */
+    .block { min-height: 100svh; justify-content: flex-end;
+      padding: 31svh 0 8svh; max-width: none; }
+    /* A photo is not paper. The 3D model sits on the shell colour, so a light
+       scrim is enough; step photography is mid-tone and full-bleed, so the copy
+       riding over it needs a far heavier one. */
+    .stagewrap.mode-images::after {
+      background: linear-gradient(to top,
+        var(--paper) 0%, var(--paper) 47%,
+        rgba(239, 236, 229, .93) 59%,
+        rgba(239, 236, 229, .58) 73%,
+        rgba(239, 236, 229, .18) 88%, transparent 100%); }
+
+    /* Paper rising from the bottom so copy over the stage keeps its contrast -
+       the main site's equivalent is the inset-x-0 bottom-0 h-[38%] paper
+       gradient layered over its stage. */
+    .stagewrap::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(to top,
+        var(--paper) 0%, var(--paper) 33%,
+        rgba(239, 236, 229, .88) 47%,
+        rgba(239, 236, 229, .40) 63%, transparent 80%); }
     .caption, .scalebar, .hint, .stepCounter { display: none; }
 
-    /* The stacked overlay set belongs to the sticky stage. With the stage gone
-       by the time you reach the process, each photo is moved into its own step
-       instead (placeStepImages), so it sits beside the words it illustrates. */
-    .stepImages { display: none; }
-    ol.steps { gap: 46px; }
-    ol.steps li > img { grid-column: 1 / -1; width: 100%; height: 208px;
-      object-fit: cover; margin: 0 0 14px; border: 1px solid var(--line);
-      filter: saturate(.86) brightness(1.04) contrast(.97); }
+    /* Steps, in the main site's format (components/home/FirstVisit.tsx):
+       a compact card grid on phones - "MOBILE: 2x2 card grid (compact, fits
+       one screen)" - each card a rounded panel with a number chip, title and
+       text. Same concept as the desktop list, a format that survives a phone.
+       The photo takes over the full-screen stage as its step scrolls past, the
+       same swap the desktop stage already does; it no longer has to be inlined
+       into each <li>, which is what made this section 2,200px tall.
+       Steps stay lit here: at card size the dimmed-until-active treatment just
+       looks like broken text. */
+    /* One column, chip beside the text. The main site's 2x2 works because its
+       step blurbs are one line; these run two to three sentences, and at the
+       162px a two-up grid leaves on a 390px screen they broke to three words a
+       line. Full width keeps the card format and gives the copy a real measure. */
+    ol.steps { grid-template-columns: 1fr; gap: 8px; margin-top: 14px; }
+    ol.steps li { display: grid; grid-template-columns: 30px 1fr; gap: 3px 12px;
+      align-items: start; opacity: 1;
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: 14px; padding: 13px 15px 14px; }
+    ol.steps i { grid-row: 1 / span 2; display: grid; place-items: center;
+      width: 30px; height: 30px; border-radius: 10px; padding: 0;
+      border: 0; background: var(--foam); color: var(--accent);
+      font-size: 13px; }
+    ol.steps h3 { margin: 4px 0 0; font-size: 14.5px; }
+    ol.steps p { margin: 0; font-size: 13.5px; line-height: 1.45; }
     .baGrid img { height: 150px; }
     .materials { grid-template-columns: 1fr; gap: 24px; }
     header.top { padding: 10px 18px; }
@@ -364,8 +400,7 @@
     .material p:last-child { font-size: 13px; }
     .materialNote { margin-top: 10px; padding: 9px 11px; font-size: 12.5px; }
 
-    .stagewrap { height: 27svh; }
-    .block { min-height: 73svh; }
+    .block { padding: 30svh 0 8svh; }
   }
 
   /* Narrow phones (<=400px): the Material section carries the most words of
@@ -388,8 +423,8 @@
      room. Height is the binding constraint there, so this tier comes after the
      <=400px width tier and wins where the two overlap. */
   @media (max-width: 560px) and (max-height: 720px) {
-    .stagewrap { height: 21svh; }
-    .block { min-height: 79svh; padding: 18px 0; }
+    /* Short phones give the model less room before the copy needs it. */
+    .block { padding: 25svh 0 6svh; }
     body { font-size: 14.5px; line-height: 1.46; }
     h1 { font-size: 27px; margin: 0 0 11px; }
     h2 { font-size: 20px; margin: 0 0 10px; }
@@ -911,26 +946,7 @@ function measureViewport() {
 }
 measureViewport();
 
-// On a phone the stage is not sticky - it scrolls away with the hero (see the
-// max-width:900px rules). The step photos live inside the stage, so they would
-// scroll away with it and never be seen next to the step they illustrate.
-// Move each photo into its own <li> at phone widths, and back again above it.
-const inlineSteps = window.matchMedia('(max-width: 900px)');
-function placeStepImages() {
-  const inline = inlineSteps.matches;
-  stepImages.forEach((img, i) => {
-    const li = stepLis[i];
-    if (!li) return;
-    if (inline) {
-      if (img.parentElement !== li) li.insertBefore(img, li.firstChild);
-    } else if (img.parentElement !== stepImagesHost) {
-      // restore in index order, ahead of the counter
-      stepImagesHost.insertBefore(img, stepCounterEl);
-    }
-  });
-}
-placeStepImages();
-inlineSteps.addEventListener('change', placeStepImages);
+
 
 // For each pair of consecutive anchors, progress is how far the scroll
 // position has moved from anchor A crossing the reading line to anchor B
@@ -958,9 +974,7 @@ function updateStepCounter() {
 function updateSteps() {
   const rect = processSection.getBoundingClientRect();
   const inView = rect.top < vpH * 0.9 && rect.bottom > vpH * 0.1;
-  // Only swap the stage over to photos while the stage is actually the thing
-  // showing them; with inline photos the stage stays on the 3D model.
-  stagewrapEl.classList.toggle('mode-images', inView && !inlineSteps.matches);
+  stagewrapEl.classList.toggle('mode-images', inView);
 
   const trigger = vpH * 0.5;
   let closest = 0, closestDist = Infinity;
@@ -970,8 +984,7 @@ function updateSteps() {
     if (d < closestDist) { closestDist = d; closest = idx; }
   });
   activeStepIndex = closest;
-  const dim = !inlineSteps.matches;
-  stepLis.forEach((li, idx) => li.classList.toggle('active', !dim || (inView && idx === closest)));
+  stepLis.forEach((li, idx) => li.classList.toggle('active', inView && idx === closest));
   stepImages.forEach((img, idx) => img.classList.toggle('active', idx === closest));
   updateStepCounter();
 }
@@ -1002,12 +1015,6 @@ function resize() {
   camera.updateProjectionMatrix();
   measureViewport();
   if (typeof updateFraming === 'function') updateFraming();
-  // Driven from here as well as from the matchMedia listener: the media-query
-  // 'change' event was observed not to fire on every crossing, which left the
-  // photos stranded in the hidden stage container and the process section with
-  // no images at all. placeStepImages() is idempotent, so calling it on every
-  // resize is free insurance.
-  placeStepImages();
 }
 
 // ANCHOR_KEYS distances are framed for the tall desktop stage (aspect ~0.8),
@@ -1025,14 +1032,13 @@ const REF_ASPECT = 0.8;
 const HALF_FOV_TAN = Math.tan(38 * Math.PI / 360);
 let coverFrac = 0, distMul = 1;
 
-/* Continuous portrait factor, 0 = wide/landscape stage, 1 = tall/portrait,
-   measured on the STAGE and not the window (same reason as vpH above). The
-   main site derives its tooth framing this way rather than from a hard 768px
-   breakpoint, so tablets and odd ratios cross over smoothly instead of
-   snapping, and a short landscape phone never crops. */
-function portraitFactor(aspect) {
-  return Math.min(1, Math.max(0, (1.2 - aspect) / 0.9));
-}
+/* How far the copy overlays the stage from the bottom. On phones the stage is
+   full-screen and the copy sits over its lower two-thirds, so the arch has to
+   ride UP into the part that stays clear - the main site nudges its tooth the
+   same way (max-md:translate-y-[4svh] on the poster). 0 on desktop, where the
+   copy is a separate column and the arch keeps the centre. */
+const journeyLift = window.matchMedia('(max-width: 900px)');
+function liftFraction() { return journeyLift.matches ? 0.46 : 0; }
 
 function updateFraming() {
   const band = canvas.clientHeight || 1;
@@ -1046,15 +1052,13 @@ function updateFraming() {
   // Desktop's 65px over a 900px stage is negligible; don't disturb that framing.
   coverFrac = f < 0.12 ? 0 : Math.min(f, 0.45);
   const a = Math.max(0.35, camera.aspect || REF_ASPECT);
-  // Blend between the two things that can limit the arch: on a WIDE stage it is
-  // the frame height (pull in proportionally to aspect), on a TALL stage it is
-  // the frame width (the desktop framing the anchors were authored against).
-  // Interpolating on the portrait factor keeps the arch the same visual size
-  // through every ratio instead of jumping at a breakpoint.
-  const pf = portraitFactor(a);
-  const wide = REF_ASPECT / a;
-  const fit = wide + (1 - wide) * pf;
-  distMul = Math.min(1, Math.max(0.45, fit / (1 - coverFrac)));
+  // The arch is far wider than it is tall, so what limits it is almost always
+  // the frame's WIDTH. Vertical FOV is fixed, so horizontal extent scales with
+  // aspect: holding distance proportional to 1/aspect keeps the arch occupying
+  // the same share of the frame at every ratio. The ceiling has to be above 1 -
+  // a tall phone stage (aspect ~0.46) needs to pull BACK about 1.7x from the
+  // desktop framing, and clamping at 1 was cropping the arch off both edges.
+  distMul = Math.min(2.4, Math.max(0.45, (REF_ASPECT / a) / (1 - coverFrac)));
 }
 
 // Once the stage scrolls away on a phone there is nothing to draw, so stop
@@ -1084,7 +1088,9 @@ function frame() {
     d * Math.sin(el),
     d * Math.cos(el) * Math.cos(az)
   );
-  camera.lookAt(0, coverFrac * d * HALF_FOV_TAN, 0);
+  // + aims below centre (pushes the arch down, clearing the header);
+  // - aims above centre (lifts it clear of the copy on a phone).
+  camera.lookAt(0, (coverFrac - liftFraction()) * d * HALF_FOV_TAN, 0);
   setSeating(state.seat);
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
