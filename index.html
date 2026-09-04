@@ -182,8 +182,40 @@
     line-height: 1.16; letter-spacing: -.02em; margin: 0 0 18px; text-wrap: pretty; color: var(--ink); }
   p { margin: 0 0 18px; color: var(--text); text-wrap: pretty; }
   p.lead { font-size: 20px; color: var(--ink); }
-  .materials { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; margin: 30px 0 4px; }
-  .material { padding-top: 16px; border-top: 1px solid var(--line); }
+  .materials { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 26px 0 4px; align-items: stretch; }
+  /* Flip cards, the main site's MaterialFlipCard ported: FRONT = name + text
+     with an arrow in the top-right; click flips the card (rotateY) to the BACK
+     = a photo of that veneer type with a caption. The hidden face is inert.
+     Reduced motion keeps the flip and makes it instant. */
+  .flip { perspective: 1200px; min-height: 13rem; }
+  .flipInner { position: relative; height: 100%; transition: transform .5s cubic-bezier(.2,.7,.2,1);
+    transform-style: preserve-3d; }
+  .flip.is-flipped .flipInner { transform: rotateY(180deg); }
+  @media (prefers-reduced-motion: reduce) { .flipInner { transition: none; } }
+  .flipFace { backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 16px;
+    border: 1px solid var(--line); }
+  .flipFront { position: relative; padding: 18px; background: var(--card-cool); }
+  .flip.is-flipped .flipFront { pointer-events: none; }
+  .flipBack { position: absolute; inset: 0; overflow: hidden; background: var(--paper-2);
+    transform: rotateY(180deg); pointer-events: none; }
+  .flip.is-flipped .flipBack { pointer-events: auto; }
+  .flipBack img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .flipBtn { position: absolute; right: 12px; top: 12px; z-index: 2; display: grid; place-items: center;
+    width: 36px; height: 36px; border-radius: 50%; padding: 0; cursor: pointer; font: inherit;
+    background: var(--card); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+    transition: background .2s ease, border-color .2s ease; }
+  .flipBtn svg { width: 16px; height: 16px; }
+  .flipBtn:hover { background: var(--foam); border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+  .flipBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .flipHit { position: absolute; inset: 0; z-index: 2; background: transparent; border: 0; cursor: pointer; }
+  .flipHit:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; border-radius: 16px; }
+  .flipCaption { position: absolute; inset: auto 0 0 0; z-index: 3; pointer-events: none;
+    padding: 34px 16px 14px; color: #fff;
+    background: linear-gradient(to top, rgba(11, 30, 44, .82), rgba(11, 30, 44, .35) 55%, transparent); }
+  .flipCaption b { display: block; font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; font-size: 14.5px; }
+  .flipCaption span { display: block; margin-top: 2px; font-size: 12px; color: rgba(255,255,255,.78); }
+  .flipFront .materialName { padding-right: 40px; }
+  .flipFront p:last-child { margin: 0; font-size: 14.5px; color: var(--ink-soft); }
   .materialName { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; font-size: 24px; line-height: 1.1;
     color: var(--ink); margin: 0 0 8px; }
   /* the physical difference in a glance: light enters ceramic (translucent,
@@ -200,26 +232,20 @@
     background: var(--card-cool); font-size: 14.5px; color: var(--text); }
   .materialNote b { color: var(--ink); font-weight: 600; }
 
-  /* the gauge: bar HEIGHT is thickness, drawn at 20x, edge-on like a section */
-  .gauge { --mag: 20mm; margin-top: 14px; padding-top: 20px; border-top: 1px solid var(--line); }
-  /* short laptops (1366x768) have ~130px less than a 900px screen; the gauge
-     yields some magnification so the hero still holds one screen there */
-  @media (min-width: 901px) and (max-height: 820px) {
-    .gauge { --mag: 10mm; margin-top: 8px; padding-top: 12px; }
-    .gaugeRows { gap: 4px; } .gaugeRow b { font-size: 20px; }
-    .gaugeTitle { margin-bottom: 8px; } .gaugeNote { margin-top: 8px; }
-    .block:first-child p.lead { font-size: 16.5px; line-height: 1.55; } }
-  .gaugeTitle { margin: 0 0 12px; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  /* the gauge: three slabs on edge, WIDTH is thickness at --mag */
+  .gauge { --mag: 20mm; margin-top: 14px; padding-top: 18px; border-top: 1px solid var(--line); }
+  @media (min-width: 901px) and (max-height: 820px) { .gauge { --mag: 14mm; } }
+  .gaugeTitle { margin: 0 0 14px; font-size: 13.5px; font-weight: 600; color: var(--ink); }
   .gaugeMag { margin-left: 8px; font-weight: 400; color: var(--ink-soft); }
-  .gaugeRows { display: grid; gap: 8px; }
-  .gaugeRow { display: grid; grid-template-columns: 1fr auto minmax(9ch, auto); align-items: center; gap: 14px; }
-  .gaugeRow i { display: block; height: calc(var(--mm) * var(--mag)); border-radius: 2px;
-    background: color-mix(in srgb, var(--ink-soft) 55%, transparent); }
-  .gaugeRow.is-veneer i { background: var(--accent); }
-  .gaugeRow b { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 22px; font-weight: 700;
-    font-variant-numeric: tabular-nums; letter-spacing: -.01em; color: var(--ink); }
-  .gaugeRow.is-veneer b { color: var(--accent); }
-  .gaugeRow span { font-size: 13px; color: var(--ink-soft); }
+  .gaugeSlabs { display: flex; align-items: flex-end; gap: 26px; }
+  .slab { display: grid; justify-items: start; gap: 7px; }
+  .slab i { display: block; height: 58px; width: calc(var(--mm) * var(--mag)); border-radius: 2px;
+    background: color-mix(in srgb, var(--ink-soft) 40%, transparent); }
+  .slab.is-veneer i { background: var(--accent); }
+  .slab b { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 18px; font-weight: 700;
+    font-variant-numeric: tabular-nums; letter-spacing: -.01em; color: var(--ink); line-height: 1; }
+  .slab.is-veneer b { color: var(--accent); }
+  .slab span { font-size: 12.5px; color: var(--ink-soft); line-height: 1.2; }
   .gaugeNote { display: flex; align-items: center; gap: 9px; margin: 14px 0 0; font-size: 12.5px; color: var(--ink-soft); }
   .gaugeNote i { display: inline-block; width: 30px; height: calc(var(--mm) * 1mm); min-height: 1px; background: var(--accent); }
 
@@ -332,6 +358,15 @@
     transition: opacity .4s ease; }
 
   .stepImages { position: absolute; inset: 0; opacity: 0; transition: opacity .5s ease; pointer-events: none; }
+  /* On a laptop the photo is a framed 4:3 card in the stage column - the main
+     site's gallery slot - rather than a photo bleeding to every edge. */
+  @media (min-width: 901px) {
+    .stagewrap > .stepImages { inset: auto 9% auto 9%; top: 50%; transform: translateY(-50%);
+      aspect-ratio: 4 / 3; border-radius: 22px; overflow: hidden; border: 1px solid var(--line);
+      box-shadow: 0 30px 70px -36px rgba(11, 30, 44, .45); }
+    .stagewrap > .stepImages::after { border-radius: 22px;
+      background: linear-gradient(to top, rgba(11, 30, 44, .10), transparent 38%); }
+  }
   .stepImages img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
     opacity: 0; transition: opacity .6s ease;
     /* graded toward the page's warm-paper world: lifted and slightly desaturated
@@ -407,7 +442,7 @@
        around it, instead of sitting in a band at the top that the page scrolls
        past. z-order: stage 1, copy 2, header 5. */
     .stagewrap { position: sticky; top: 0; height: 100svh; order: -1;
-      --cx: 50%; --cy: 21%; z-index: 1; }
+      --cx: 50%; --cy: 30%; --copyTop: 60%; z-index: 1; }
     .copy { margin-top: -100svh; position: relative; z-index: 2; }
     /* Copy sits low so the model reads above it - the main site does the same
        on phones (the act carries pt-[14svh] pb-24, the poster is nudged down
@@ -429,11 +464,17 @@
     /* Paper rising from the bottom so copy over the stage keeps its contrast -
        the main site's equivalent is the inset-x-0 bottom-0 h-[38%] paper
        gradient layered over its stage. */
+    /* Solid paper up to the copy's top edge, fully clear by the model's BOTTOM
+       edge (centre --cy plus ~half its height), so the fade can never land on
+       the model. When a tall section leaves no gap the stops meet and the copy
+       simply overlaps the model's base with a hard edge. */
     .stagewrap::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+      --solid: calc(100% - var(--copyTop, 60%) + 1%);
+      --clear: calc(100% - var(--cy, 30%) - 12%);
       background: linear-gradient(to top,
-        var(--paper) 0%, var(--paper) 33%,
-        rgba(239, 236, 229, .88) 47%,
-        rgba(239, 236, 229, .40) 63%, transparent 80%); }
+        var(--paper) 0%, var(--paper) var(--solid),
+        rgba(239, 236, 229, .55) calc(var(--solid) + (var(--clear) - var(--solid)) * .45),
+        transparent var(--clear)); }
     .caption, .scalebar, .hint { display: none; }
 
     /* Steps, in the main site's format (components/home/FirstVisit.tsx):
@@ -455,7 +496,14 @@
     ol.steps h3 { margin: 6px 0 0; font-size: 14.5px; }
     ol.steps p { margin: 4px 0 0; font-size: 13.5px; line-height: 1.45; }
     .baViewer { margin-top: 26px; }
-    .materials { grid-template-columns: 1fr; gap: 24px; }
+    .materials { grid-template-columns: 1fr; gap: 8px; margin-top: 10px; }
+    .flip { min-height: 0; }
+    .flipFront { padding: 11px 12px 12px; }
+    .flipFront p:last-child { font-size: 13.5px; line-height: 1.4; }
+    .flipFront .materialLead { margin-bottom: 5px; }
+    .flipFront .materialName { margin-bottom: 4px; }
+    #material > p { margin-bottom: 9px; }
+    .materialNote { margin-top: 8px; }
     header.top { padding: 10px 18px; }
     .controls { gap: 8px; }
     .btnSm { font-size: 11.5px; padding: 9px 12px; letter-spacing: .06em; }
@@ -477,19 +525,14 @@
     p { margin: 0 0 13px; }
     p.lead { font-size: 16.5px; }
     .gauge { --mag: 12mm; margin-top: 8px; padding-top: 12px; }
+    .gaugeSlabs { gap: 18px; } .slab i { height: 46px; } .slab b { font-size: 16px; }
     .gaugeTitle { margin-bottom: 9px; font-size: 13px; }
-    .gaugeRows { gap: 5px; }
-    .gaugeRow { gap: 10px; }
-    .gaugeRow b { font-size: 18px; }
-    .gaugeRow span { font-size: 12.5px; }
     .gaugeNote { margin-top: 8px; font-size: 12px; }
     /* the hero carries the gauge; it can spend a little of the model's room */
     .block:first-child { padding-top: 23svh; }
     .materials { gap: 12px; margin: 12px 0 0; }
-    .material { padding-top: 9px; }
     .materialName { font-size: 19px; margin: 0 0 5px; }
     .materialLead { font-size: 10px; margin: 0 0 6px; }
-    .material p:last-child { font-size: 13px; }
     .materialNote { margin-top: 10px; padding: 9px 11px; font-size: 12.5px; }
 
     .block { padding: 26svh 0 6svh; }
@@ -504,17 +547,13 @@
     .block:first-child { padding-top: 22svh; }
     .block:first-child p.lead { font-size: 14.5px; line-height: 1.46; }
     h1 { font-size: 32px; }
-    .gauge { --mag: 10mm; margin-top: 6px; padding-top: 10px; }
-    .gaugeRows { gap: 4px; }
-    .gaugeRow b { font-size: 17px; }
+    .gauge { --mag: 11mm; margin-top: 6px; padding-top: 10px; }
     p { margin: 0 0 9px; }
     #material h2 { font-size: 20px; margin: 0 0 8px; }
     #material > p { margin: 0 0 9px; }
     .materials { gap: 7px; margin: 8px 0 0; }
-    .material { padding-top: 6px; }
     .materialName { font-size: 17px; margin: 0 0 3px; }
     .materialLead { font-size: 9.5px; margin: 0 0 4px; }
-    .material p:last-child { font-size: 12.5px; line-height: 1.4; }
     .materialNote { margin-top: 6px; padding: 6px 9px; font-size: 11.5px; line-height: 1.42; }
   }
 
@@ -534,10 +573,8 @@
     #material h2 { font-size: 19px; margin: 0 0 9px; }
     #material > p { margin: 0 0 9px; }
     .materials { gap: 7px; margin: 8px 0 0; }
-    .material { padding-top: 6px; }
     .materialName { font-size: 17px; margin: 0 0 3px; }
     .materialLead { font-size: 9.5px; margin: 0 0 4px; }
-    .material p:last-child { font-size: 12px; line-height: 1.4; }
     .materialNote { margin-top: 6px; padding: 6px 9px; font-size: 11.5px; line-height: 1.4; }
     ol.steps li > img { height: 170px; }
   }
@@ -566,12 +603,15 @@
            cross-section of three thicknesses at 20x, with a TRUE-size tick.
            CSS mm are physical units (1mm = 3.78px), so 0.4mm at 1:1 is a
            1.5px hairline - honest but invisible; magnified it can be read. -->
+      <!-- Three shells standing on edge: WIDTH is thickness at the stated
+           magnification, with a true-size tick in the note. CSS mm are
+           physical units (1mm = 3.78px); 0.4mm at 1:1 is a 1.5px hairline. -->
       <div class="gauge">
         <p class="gaugeTitle"><span data-i18n="hero.gaugeTitle">Wie d&uuml;nn ist d&uuml;nn?</span> <span class="gaugeMag" id="gaugeMag">20-fach vergr&ouml;&szlig;ert</span></p>
-        <div class="gaugeRows">
-          <div class="gaugeRow is-veneer" style="--mm: .4"><i aria-hidden="true"></i><b>0,4&nbsp;mm</b><span data-i18n="hero.gVeneer">ein Veneer</span></div>
-          <div class="gaugeRow" style="--mm: .5"><i aria-hidden="true"></i><b>0,5&nbsp;mm</b><span data-i18n="hero.gNail">Ihr Fingernagel</span></div>
-          <div class="gaugeRow" style="--mm: .76"><i aria-hidden="true"></i><b>0,76&nbsp;mm</b><span data-i18n="hero.gCard">eine Bankkarte</span></div>
+        <div class="gaugeSlabs">
+          <div class="slab is-veneer" style="--mm: .4"><i aria-hidden="true"></i><b>0,4&nbsp;mm</b><span data-i18n="hero.gVeneer">ein Veneer</span></div>
+          <div class="slab" style="--mm: .5"><i aria-hidden="true"></i><b>0,5&nbsp;mm</b><span data-i18n="hero.gNail">Ihr Fingernagel</span></div>
+          <div class="slab" style="--mm: .76"><i aria-hidden="true"></i><b>0,76&nbsp;mm</b><span data-i18n="hero.gCard">eine Bankkarte</span></div>
         </div>
         <p class="gaugeNote"><i aria-hidden="true" style="--mm: .4"></i><span data-i18n="hero.gNote">tats&auml;chliche St&auml;rke &middot; 2 Materialien &middot; 15+ Jahre haltbar</span></p>
       </div>
@@ -587,15 +627,35 @@
       <h2 data-i18n="material.h2">Keramik oder Composite.</h2>
       <p data-i18n="material.p">Zur Auswahl stehen zwei Materialien. Welches passt, h&auml;ngt von Ihrem Zahn, Ihrem Anspruch und Ihrem Budget ab &ndash; wir besprechen das offen, bevor irgendetwas geschliffen wird.</p>
       <div class="materials">
-        <div class="material">
-          <p class="materialName"><i class="swatch swatch--ceramic" aria-hidden="true"></i><span data-i18n="material.m1Name">Keramik</span></p>
-          <p class="materialLead" data-i18n="material.m1Lead">Fleckenresistent und lichtdurchl&auml;ssig</p>
-          <p data-i18n="material.m1Body">Keramik-Veneers sind besonders fleckenresistent, lichtdurchl&auml;ssig und bei guter Pflege &uuml;ber viele Jahre stabil. Weil Licht wie bei echtem Schmelz in die Schale eindringt, wirkt das Ergebnis lebendig statt flach.</p>
+        <div class="flip">
+          <div class="flipInner">
+            <div class="flipFace flipFront">
+              <button type="button" class="flipBtn" data-flip="show" data-i18n-aria="material.seePhoto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+              <p class="materialName"><i class="swatch swatch--ceramic" aria-hidden="true"></i><span data-i18n="material.m1Name">Keramik</span></p>
+              <p class="materialLead" data-i18n="material.m1Lead">Fleckenresistent und lichtdurchl&auml;ssig</p>
+              <p data-i18n="material.m1Body">Keramik-Veneers sind besonders fleckenresistent, lichtdurchl&auml;ssig und bei guter Pflege &uuml;ber viele Jahre stabil. Weil Licht wie bei echtem Schmelz in die Schale eindringt, wirkt das Ergebnis lebendig statt flach.</p>
+            </div>
+            <div class="flipFace flipBack" aria-hidden="true">
+              <img src="assets/materials/keramik.jpg" loading="lazy" decoding="async" data-i18n-alt="material.m1Alt" alt="">
+              <button type="button" class="flipHit" data-flip="hide" data-i18n-aria="material.back" tabindex="-1"></button>
+              <div class="flipCaption"><b data-i18n="material.m1Full">Keramik-Veneers</b><span data-i18n="material.m1Cap">Hauchd&uuml;nne Keramikschalen (Beispielbild)</span></div>
+            </div>
+          </div>
         </div>
-        <div class="material">
-          <p class="materialName"><i class="swatch swatch--composite" aria-hidden="true"></i><span data-i18n="material.m2Name">Composite</span></p>
-          <p class="materialLead" data-i18n="material.m2Lead">G&uuml;nstiger und leichter zu reparieren</p>
-          <p data-i18n="material.m2Body">Composite-Veneers sind g&uuml;nstiger und lassen sich sp&auml;ter leichter ausbessern. Daf&uuml;r sind sie anf&auml;lliger f&uuml;r Verf&auml;rbungen &ndash; Kaffee, Tee und Tabak hinterlassen hier eher Spuren als auf Keramik.</p>
+        <div class="flip">
+          <div class="flipInner">
+            <div class="flipFace flipFront">
+              <button type="button" class="flipBtn" data-flip="show" data-i18n-aria="material.seePhoto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+              <p class="materialName"><i class="swatch swatch--composite" aria-hidden="true"></i><span data-i18n="material.m2Name">Composite</span></p>
+              <p class="materialLead" data-i18n="material.m2Lead">G&uuml;nstiger und leichter zu reparieren</p>
+              <p data-i18n="material.m2Body">Composite-Veneers sind g&uuml;nstiger und lassen sich sp&auml;ter leichter ausbessern. Daf&uuml;r sind sie anf&auml;lliger f&uuml;r Verf&auml;rbungen &ndash; Kaffee, Tee und Tabak hinterlassen hier eher Spuren als auf Keramik.</p>
+            </div>
+            <div class="flipFace flipBack" aria-hidden="true">
+              <img src="assets/materials/composite.jpg" loading="lazy" decoding="async" data-i18n-alt="material.m2Alt" alt="">
+              <button type="button" class="flipHit" data-flip="hide" data-i18n-aria="material.back" tabindex="-1"></button>
+              <div class="flipCaption"><b data-i18n="material.m2Full">Composite-Veneers</b><span data-i18n="material.m2Cap">Direkt aufgebautes Composite (Beispielbild)</span></div>
+            </div>
+          </div>
         </div>
       </div>
       <p class="materialNote" data-i18n="material.note"><b>Ohne Beschleifen?</b> In geeigneten F&auml;llen bieten wir minimalinvasive oder &bdquo;no-prep&ldquo; Veneers (Lumineers) an, die weniger oder gar kein Beschleifen der nat&uuml;rlichen Z&auml;hne erfordern. Ob das f&uuml;r Sie infrage kommt, pr&uuml;fen wir sorgf&auml;ltig.</p>
@@ -830,6 +890,14 @@ const I18N = {
       h2: 'Keramik oder Composite.',
       p: 'Zur Auswahl stehen zwei Materialien. Welches passt, h\u00e4ngt von Ihrem Zahn, Ihrem Anspruch und Ihrem Budget ab \u2013 wir besprechen das offen, bevor irgendetwas geschliffen wird.',
       m1Name: 'Keramik',
+      m1Full: 'Keramik-Veneers',
+      m1Cap: 'Hauchd\u00fcnne Keramikschalen (Beispielbild)',
+      m1Alt: 'Fertige Keramik-Veneers vor der Befestigung (Beispielbild)',
+      m2Full: 'Composite-Veneers',
+      m2Cap: 'Direkt aufgebautes Composite (Beispielbild)',
+      m2Alt: 'Mit Composite gestaltetes L\u00e4cheln (Beispielbild)',
+      seePhoto: 'Foto ansehen',
+      back: 'Zur\u00fcck zur \u00dcbersicht',
       m1Lead: 'Fleckenresistent und lichtdurchl\u00e4ssig',
       m1Body: 'Keramik-Veneers sind besonders fleckenresistent, lichtdurchl\u00e4ssig und bei guter Pflege \u00fcber viele Jahre stabil. Weil Licht wie bei echtem Schmelz in die Schale eindringt, wirkt das Ergebnis lebendig statt flach.',
       m2Name: 'Composite',
@@ -925,6 +993,14 @@ const I18N = {
       h2: 'Ceramic or composite.',
       p: 'Two materials are available. Which one fits depends on your tooth, your expectations and your budget \u2013 we discuss that openly, before anything is prepared.',
       m1Name: 'Ceramic',
+      m1Full: 'Ceramic veneers',
+      m1Cap: 'Wafer-thin ceramic shells (example image)',
+      m1Alt: 'Finished ceramic veneers before bonding (example image)',
+      m2Full: 'Composite veneers',
+      m2Cap: 'Directly built-up composite (example image)',
+      m2Alt: 'A smile shaped with composite (example image)',
+      seePhoto: 'See the photo',
+      back: 'Back to the overview',
       m1Lead: 'Stain-resistant and translucent',
       m1Body: 'Ceramic veneers are particularly stain-resistant, translucent and, with good care, stable for many years. Because light enters the shell as it does real enamel, the result looks alive rather than flat.',
       m2Name: 'Composite',
@@ -1178,6 +1254,7 @@ function updateSteps() {
 }
 
 function readScroll() {
+  measureLift();
   const { i, f } = anchorProgress();
   const e = f * f * (3 - 2 * f);
   const a = ANCHOR_KEYS[i], b = ANCHOR_KEYS[i + 1];
@@ -1205,6 +1282,7 @@ function resize() {
   if (typeof updateFraming === 'function') updateFraming();
   if (typeof placeStepSlot === 'function') placeStepSlot();
   updateGaugeMag();
+  measureLift();
 }
 // The gauge's magnification is a CSS token that changes per breakpoint; the
 // label is read back from it so "20-fach" can never be shown over 12x bars.
@@ -1236,7 +1314,33 @@ let coverFrac = 0, distMul = 1;
    same way (max-md:translate-y-[4svh] on the poster). 0 on desktop, where the
    copy is a separate column and the arch keeps the centre. */
 const journeyLift = window.matchMedia('(max-width: 900px)');
-function liftFraction() { return journeyLift.matches ? 0.68 : 0; }
+/* On a phone the model is centred in whatever room the current section's copy
+   leaves above it - never lower than just above centre, never into the header.
+   Short copy lets it sit near the middle of the screen; a tall section lifts
+   it. Measured on scroll, eased per frame; the stage's contrast pocket and
+   paper scrim follow it via --cy / --copyTop. */
+let liftTarget = 0, liftCur = 0, liftSnapped = false;
+function measureLift() {
+  if (!journeyLift.matches) { liftTarget = 0; return; }
+  const hdrEl = document.querySelector('header.top');
+  const hdr = hdrEl ? hdrEl.getBoundingClientRect().height : 0;
+  let copyTop = vpH;
+  for (const bl of document.querySelectorAll('.copy .block')) {
+    const r = bl.getBoundingClientRect();
+    if (r.bottom <= hdr || r.top >= vpH) continue;
+    const first = bl.children[0]; if (!first) continue;
+    const t = first.getBoundingClientRect().top;
+    if (t > hdr && t < copyTop) copyTop = t;
+  }
+  const centre = Math.min(0.42, Math.max(0.17, (hdr + copyTop) / 2 / vpH));
+  liftTarget = 2 * (0.5 - centre);
+  // First measurement snaps: on load the model should already be in place,
+  // not ride up from the centre while the page settles. Eased after that.
+  if (!liftSnapped) { liftCur = liftTarget; liftSnapped = true; }
+  stagewrapEl.style.setProperty('--cy', (centre * 100).toFixed(1) + '%');
+  stagewrapEl.style.setProperty('--copyTop', (copyTop / vpH * 100).toFixed(1) + '%');
+}
+function liftFraction() { return liftCur; }
 
 function updateFraming() {
   const band = canvas.clientHeight || 1;
@@ -1280,6 +1384,7 @@ function frame() {
 
   const az = (state.az + Math.sin(idle) * 1.6) * Math.PI / 180;
   const el = (state.el + Math.cos(idle * 0.8) * 0.8) * Math.PI / 180;
+  liftCur = lerp(liftCur, liftTarget, 0.08);
   const d = state.dist * distMul;
   camera.position.set(
     d * Math.cos(el) * Math.sin(az),
@@ -1297,6 +1402,21 @@ function frame() {
 addEventListener('scroll', readScroll, { passive: true });
 addEventListener('resize', resize);
 applyLang(currentLang);
+// Flip cards. One handler per card; the two faces are toggled inert so only
+// the visible face can receive focus or clicks.
+document.querySelectorAll('.flip').forEach((card) => {
+  const front = card.querySelector('.flipFront'), back = card.querySelector('.flipBack');
+  const set = (flipped) => {
+    card.classList.toggle('is-flipped', flipped);
+    front.setAttribute('aria-hidden', String(flipped));
+    back.setAttribute('aria-hidden', String(!flipped));
+    card.querySelector('.flipBtn').tabIndex = flipped ? -1 : 0;
+    card.querySelector('.flipHit').tabIndex = flipped ? 0 : -1;
+  };
+  card.querySelector('.flipBtn').addEventListener('click', () => set(true));
+  card.querySelector('.flipHit').addEventListener('click', () => set(false));
+});
+
 // Before/after viewer - the step gallery's control, with its own index.
 const baImgs = Array.from(document.querySelectorAll('#baStage img'));
 const baDotsEl = document.getElementById('baDots');
