@@ -32,6 +32,7 @@
     --paper-2: #e7e2d8;       /* --color-shell-2 — ghost-button hover */
     --card: #f6f3ec;          /* --color-card    — lifted surfaces */
     --foam: #d8e8f8;          /* --color-foam    — soft blue chip fill */
+    --card-cool: color-mix(in srgb, #d8e8f8 26%, #f6f3ec); /* cards lean cool against warm paper */
     --ink: #0b1e2c;           /* --color-deep    — headings, strong text */
     --ink-soft: #4f6678;      /* --color-muted   — eyebrows, captions, secondary */
     --line: rgba(11, 30, 44, 0.14);
@@ -156,7 +157,7 @@
        ~165px measures - three words a line, and German compounds make that
        worse. The break comes from the card bleeding off the left edge, not
        from columns the width cannot carry. */
-    #crown { background: var(--card); border-top: 1px solid var(--line);
+    #crown { background: var(--card-cool); border-top: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
       margin-left: calc(-1 * clamp(28px, 5vw, 88px));
       padding: clamp(44px, 6vh, 76px) clamp(30px, 3vw, 52px)
@@ -185,17 +186,42 @@
   .material { padding-top: 16px; border-top: 1px solid var(--line); }
   .materialName { font-family: 'Space Grotesk', system-ui, sans-serif; font-weight: 700; font-size: 24px; line-height: 1.1;
     color: var(--ink); margin: 0 0 8px; }
+  /* the physical difference in a glance: light enters ceramic (translucent,
+     a lit edge); composite is opaque and matte */
+  .swatch { display: inline-block; width: 20px; height: 20px; border-radius: 6px; vertical-align: -3px;
+    margin-right: 10px; border: 1px solid var(--line); }
+  .swatch--ceramic { background: linear-gradient(135deg, #ffffff 0%, #f6f5f1 38%, #dfe5ec 100%);
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,.95), inset -2px -2px 5px rgba(143,169,196,.28), 0 1px 2px rgba(11,30,44,.08); }
+  .swatch--composite { background: #e9e5dc; box-shadow: inset 0 0 0 1px rgba(11,30,44,.04); }
   .materialLead { font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase;
     color: var(--accent); margin: 0 0 12px; }
   .material p:last-child { margin: 0; font-size: 15px; color: var(--ink-soft); }
   .materialNote { margin-top: 22px; padding: 16px 18px; border-left: 2px solid var(--accent);
-    background: rgba(47, 111, 224, .06); font-size: 14.5px; color: var(--text); }
+    background: var(--card-cool); font-size: 14.5px; color: var(--text); }
   .materialNote b { color: var(--ink); font-weight: 600; }
 
-  .meta { display: flex; gap: 40px; margin-top: 14px; padding-top: 22px; border-top: 1px solid var(--line); }
-  .meta div { display: flex; flex-direction: column; gap: 4px; }
-  .meta b { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 28px; font-weight: 700; color: var(--ink); }
-  .meta small { font-size: 13px; letter-spacing: 0; color: var(--ink-soft); }
+  /* the gauge: bar HEIGHT is thickness, drawn at 20x, edge-on like a section */
+  .gauge { --mag: 20mm; margin-top: 14px; padding-top: 20px; border-top: 1px solid var(--line); }
+  /* short laptops (1366x768) have ~130px less than a 900px screen; the gauge
+     yields some magnification so the hero still holds one screen there */
+  @media (min-width: 901px) and (max-height: 820px) {
+    .gauge { --mag: 10mm; margin-top: 8px; padding-top: 12px; }
+    .gaugeRows { gap: 4px; } .gaugeRow b { font-size: 20px; }
+    .gaugeTitle { margin-bottom: 8px; } .gaugeNote { margin-top: 8px; }
+    .block:first-child p.lead { font-size: 16.5px; line-height: 1.55; } }
+  .gaugeTitle { margin: 0 0 12px; font-size: 13.5px; font-weight: 600; color: var(--ink); }
+  .gaugeMag { margin-left: 8px; font-weight: 400; color: var(--ink-soft); }
+  .gaugeRows { display: grid; gap: 8px; }
+  .gaugeRow { display: grid; grid-template-columns: 1fr auto minmax(9ch, auto); align-items: center; gap: 14px; }
+  .gaugeRow i { display: block; height: calc(var(--mm) * var(--mag)); border-radius: 2px;
+    background: color-mix(in srgb, var(--ink-soft) 55%, transparent); }
+  .gaugeRow.is-veneer i { background: var(--accent); }
+  .gaugeRow b { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 22px; font-weight: 700;
+    font-variant-numeric: tabular-nums; letter-spacing: -.01em; color: var(--ink); }
+  .gaugeRow.is-veneer b { color: var(--accent); }
+  .gaugeRow span { font-size: 13px; color: var(--ink-soft); }
+  .gaugeNote { display: flex; align-items: center; gap: 9px; margin: 14px 0 0; font-size: 12.5px; color: var(--ink-soft); }
+  .gaugeNote i { display: inline-block; width: 30px; height: calc(var(--mm) * 1mm); min-height: 1px; background: var(--accent); }
 
   /* generous vertical rhythm: as you scroll through the list, the pinned 3D
      model advances one step at a time (see readScroll/ANCHOR_KEYS) — the
@@ -214,7 +240,7 @@
     transition: background .2s ease, border-color .2s ease; }
   .stepBtn:hover { background: color-mix(in srgb, var(--card) 65%, transparent);
     border-color: color-mix(in srgb, var(--accent) 20%, transparent); }
-  li.active .stepBtn { background: var(--card);
+  li.active .stepBtn { background: var(--card-cool);
     border-color: color-mix(in srgb, var(--accent) 38%, transparent); }
   .stepBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -271,9 +297,27 @@
   /* right: pinned stage — swaps between the 3D model (hero / what-it-is /
      crown / suitability / consult) and a per-step photo (the process
      section only, see .stagewrap.mode-images below). */
-  .stagewrap { position: sticky; top: 0; height: 100vh;
-    background-image: radial-gradient(58% 46% at 52% 44%,
-      rgba(47, 111, 224, .085) 0%, rgba(47, 111, 224, .03) 42%, transparent 72%); }
+  /* The stage is a PLACE, not a paper field. Ported from the main site's
+     "Precision Studio" backdrop (app/page.tsx): a matte cyclorama in the shell
+     ramp, a faint dental-CAD planning grid masked to the model zone, a floor,
+     and a cool mist pocket behind the model so pale porcelain reads against
+     real contrast instead of washing into warm paper. Values are the main
+     site's own; --cx/--cy track where the model sits per breakpoint. */
+  .stagewrap { position: sticky; top: 0; height: 100vh; --cx: 50%; --cy: 46%;
+    background:
+      linear-gradient(to top, rgba(214, 204, 184, .55) 0%, rgba(224, 216, 202, .26) 22%, transparent 40%),
+      linear-gradient(to bottom, #f8f6f0 0%, #efece5 42%, #e7e2d8 74%, #e4ded0 100%); }
+  .stagewrap::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      repeating-linear-gradient(to right,  rgba(11, 30, 44, .055) 0 1px, transparent 1px 48px),
+      repeating-linear-gradient(to bottom, rgba(11, 30, 44, .055) 0 1px, transparent 1px 48px),
+      repeating-linear-gradient(to right,  rgba(29, 84, 196, .085) 0 1px, transparent 1px 192px),
+      repeating-linear-gradient(to bottom, rgba(29, 84, 196, .085) 0 1px, transparent 1px 192px);
+    -webkit-mask-image: radial-gradient(105% 115% at var(--cx) var(--cy), #000 0%, #000 36%, rgba(0,0,0,.45) 60%, transparent 80%);
+            mask-image: radial-gradient(105% 115% at var(--cx) var(--cy), #000 0%, #000 36%, rgba(0,0,0,.45) 60%, transparent 80%); }
+  /* contrast pocket sits between the grid and the canvas (the canvas is alpha) */
+  .stage3d { background: radial-gradient(36% 46% at var(--cx) var(--cy),
+      rgba(143, 169, 196, .30), rgba(180, 199, 219, .16) 52%, transparent 78%); }
   .stage3d { position: absolute; inset: 0; transition: opacity .5s ease; }
   canvas#scene { display: block; width: 100%; height: 100%; }
   .caption { position: absolute; left: 0; right: 0; bottom: 34px; text-align: center;
@@ -315,8 +359,14 @@
   .beforeAfter .eyebrow { text-align: center; }
   .beforeAfter h2 { text-align: center; }
   .beforeAfter p.lede { max-width: 34rem; margin: 0 auto 8px; color: var(--ink-soft); font-size: 15.5px; }
-  .baGrid { margin-top: 44px; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 22px; }
-  .baGrid img { height: 240px; width: auto; max-width: 100%; display: block; border: 1px solid var(--line); }
+  .baViewer { margin: 40px auto 0; max-width: 560px; }
+  .baStage { position: relative; aspect-ratio: 1 / 1; border-radius: 16px; overflow: hidden;
+    background: var(--paper-2); border: 1px solid var(--line); }
+  .baStage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;
+    opacity: 0; transition: opacity .45s ease; }
+  .baStage img.active { opacity: 1; }
+  .baNav { justify-content: center; padding-left: 0; margin-top: 16px; }
+  .baCount { font-size: 12.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; margin-left: 4px; }
 
   /* Mirrors the main site's .outro-footer: a faint teal wash falling from the
      top edge over pure ink, ice-coloured text. The one dark band on a light
@@ -357,7 +407,7 @@
        around it, instead of sitting in a band at the top that the page scrolls
        past. z-order: stage 1, copy 2, header 5. */
     .stagewrap { position: sticky; top: 0; height: 100svh; order: -1;
-      background: var(--paper); z-index: 1; }
+      --cx: 50%; --cy: 21%; z-index: 1; }
     .copy { margin-top: -100svh; position: relative; z-index: 2; }
     /* Copy sits low so the model reads above it - the main site does the same
        on phones (the act carries pt-[14svh] pb-24, the poster is nudged down
@@ -404,7 +454,7 @@
     ol.steps i { width: 32px; height: 32px; font-size: 12.5px; }
     ol.steps h3 { margin: 6px 0 0; font-size: 14.5px; }
     ol.steps p { margin: 4px 0 0; font-size: 13.5px; line-height: 1.45; }
-    .baGrid img { height: 150px; }
+    .baViewer { margin-top: 26px; }
     .materials { grid-template-columns: 1fr; gap: 24px; }
     header.top { padding: 10px 18px; }
     .controls { gap: 8px; }
@@ -426,8 +476,15 @@
     h2 { font-size: 22px; margin: 0 0 12px; }
     p { margin: 0 0 13px; }
     p.lead { font-size: 16.5px; }
-    .meta { gap: 22px; margin-top: 8px; padding-top: 14px; }
-    .meta b { font-size: 23px; }
+    .gauge { --mag: 12mm; margin-top: 8px; padding-top: 12px; }
+    .gaugeTitle { margin-bottom: 9px; font-size: 13px; }
+    .gaugeRows { gap: 5px; }
+    .gaugeRow { gap: 10px; }
+    .gaugeRow b { font-size: 18px; }
+    .gaugeRow span { font-size: 12.5px; }
+    .gaugeNote { margin-top: 8px; font-size: 12px; }
+    /* the hero carries the gauge; it can spend a little of the model's room */
+    .block:first-child { padding-top: 23svh; }
     .materials { gap: 12px; margin: 12px 0 0; }
     .material { padding-top: 9px; }
     .materialName { font-size: 19px; margin: 0 0 5px; }
@@ -444,6 +501,12 @@
      section still reads in full on one screen like it does on a laptop. */
   @media (max-width: 400px) {
     .block { padding-bottom: 5svh; }
+    .block:first-child { padding-top: 22svh; }
+    .block:first-child p.lead { font-size: 14.5px; line-height: 1.46; }
+    h1 { font-size: 32px; }
+    .gauge { --mag: 10mm; margin-top: 6px; padding-top: 10px; }
+    .gaugeRows { gap: 4px; }
+    .gaugeRow b { font-size: 17px; }
     p { margin: 0 0 9px; }
     #material h2 { font-size: 20px; margin: 0 0 8px; }
     #material > p { margin: 0 0 9px; }
@@ -461,13 +524,13 @@
   @media (max-width: 560px) and (max-height: 720px) {
     /* Short phones give the model less room before the copy needs it. */
     .block { padding: 21svh 0 5svh; }
+    .gauge { --mag: 9mm; }
     body { font-size: 14.5px; line-height: 1.46; }
     h1 { font-size: 27px; margin: 0 0 11px; }
     h2 { font-size: 20px; margin: 0 0 10px; }
     p { margin: 0 0 10px; }
     p.lead { font-size: 15px; }
     .eyebrow { margin: 0 0 9px; }
-    .meta b { font-size: 20px; }
     #material h2 { font-size: 19px; margin: 0 0 9px; }
     #material > p { margin: 0 0 9px; }
     .materials { gap: 7px; margin: 8px 0 0; }
@@ -499,10 +562,18 @@
       <p class="eyebrow" data-i18n="hero.eyebrow">Behandlung · Veneers</p>
       <h1 data-i18n="hero.h1">Eine Schale aus Keramik, <em>dünner</em> als ein Fingernagel.</h1>
       <p class="lead" data-i18n="hero.lead">Scrollen Sie – und sechs Schalen legen sich Zug um Zug auf die vorbereiteten Zähne: erst die Eckzähne, zuletzt die mittleren Schneidezähne. Dabei entsteht kein neuer Zahn, nur eine neue Oberfläche – Farbe, Kontur und Lichtspiel verändern sich, während die eigene Zahnsubstanz weitgehend erhalten bleibt.</p>
-      <div class="meta">
-        <div data-i18n="hero.stat1"><b>0,3–0,5</b><small>mm Stärke</small></div>
-        <div data-i18n="hero.stat2"><b>2</b><small>Materialien</small></div>
-        <div data-i18n="hero.stat3"><b>15+</b><small>Jahre haltbar</small></div>
+      <!-- The most characteristic fact about a veneer, made tangible: a
+           cross-section of three thicknesses at 20x, with a TRUE-size tick.
+           CSS mm are physical units (1mm = 3.78px), so 0.4mm at 1:1 is a
+           1.5px hairline - honest but invisible; magnified it can be read. -->
+      <div class="gauge">
+        <p class="gaugeTitle"><span data-i18n="hero.gaugeTitle">Wie d&uuml;nn ist d&uuml;nn?</span> <span class="gaugeMag" id="gaugeMag">20-fach vergr&ouml;&szlig;ert</span></p>
+        <div class="gaugeRows">
+          <div class="gaugeRow is-veneer" style="--mm: .4"><i aria-hidden="true"></i><b>0,4&nbsp;mm</b><span data-i18n="hero.gVeneer">ein Veneer</span></div>
+          <div class="gaugeRow" style="--mm: .5"><i aria-hidden="true"></i><b>0,5&nbsp;mm</b><span data-i18n="hero.gNail">Ihr Fingernagel</span></div>
+          <div class="gaugeRow" style="--mm: .76"><i aria-hidden="true"></i><b>0,76&nbsp;mm</b><span data-i18n="hero.gCard">eine Bankkarte</span></div>
+        </div>
+        <p class="gaugeNote"><i aria-hidden="true" style="--mm: .4"></i><span data-i18n="hero.gNote">tats&auml;chliche St&auml;rke &middot; 2 Materialien &middot; 15+ Jahre haltbar</span></p>
       </div>
     </section>
 
@@ -517,12 +588,12 @@
       <p data-i18n="material.p">Zur Auswahl stehen zwei Materialien. Welches passt, h&auml;ngt von Ihrem Zahn, Ihrem Anspruch und Ihrem Budget ab &ndash; wir besprechen das offen, bevor irgendetwas geschliffen wird.</p>
       <div class="materials">
         <div class="material">
-          <p class="materialName" data-i18n="material.m1Name">Keramik</p>
+          <p class="materialName"><i class="swatch swatch--ceramic" aria-hidden="true"></i><span data-i18n="material.m1Name">Keramik</span></p>
           <p class="materialLead" data-i18n="material.m1Lead">Fleckenresistent und lichtdurchl&auml;ssig</p>
           <p data-i18n="material.m1Body">Keramik-Veneers sind besonders fleckenresistent, lichtdurchl&auml;ssig und bei guter Pflege &uuml;ber viele Jahre stabil. Weil Licht wie bei echtem Schmelz in die Schale eindringt, wirkt das Ergebnis lebendig statt flach.</p>
         </div>
         <div class="material">
-          <p class="materialName" data-i18n="material.m2Name">Composite</p>
+          <p class="materialName"><i class="swatch swatch--composite" aria-hidden="true"></i><span data-i18n="material.m2Name">Composite</span></p>
           <p class="materialLead" data-i18n="material.m2Lead">G&uuml;nstiger und leichter zu reparieren</p>
           <p data-i18n="material.m2Body">Composite-Veneers sind g&uuml;nstiger und lassen sich sp&auml;ter leichter ausbessern. Daf&uuml;r sind sie anf&auml;lliger f&uuml;r Verf&auml;rbungen &ndash; Kaffee, Tee und Tabak hinterlassen hier eher Spuren als auf Keramik.</p>
         </div>
@@ -597,12 +668,24 @@
   <div class="inner">
     <h2 data-i18n="ba.h2">Vorher und nachher.</h2>
     <p class="lede" data-i18n="ba.p">Reale Fälle aus unserer Praxis in Aachen – veröffentlicht mit freundlicher Genehmigung unserer Patientinnen und Patienten.</p>
-    <div class="baGrid">
-      <img src="assets/before-after/1.jpg" data-i18n-alt="ba.img1Alt" alt="">
-      <img src="assets/before-after/2.jpg" data-i18n-alt="ba.img2Alt" alt="">
-      <img src="assets/before-after/3.jpg" data-i18n-alt="ba.img3Alt" alt="">
-      <img src="assets/before-after/4.jpg" data-i18n-alt="ba.img4Alt" alt="">
-      <img src="assets/before-after/5.jpg" data-i18n-alt="ba.img5Alt" alt="">
+    <!-- One case at a time, large, with the same arrows-and-dots control as
+         the step gallery. The five-thumbnail grid mixed aspect ratios and
+         left half the row empty; a single frame gives each case its due.
+         Below the fold, so the photos are lazy. -->
+    <div class="baViewer">
+      <div class="baStage" id="baStage">
+        <img src="assets/before-after/1.jpg" class="active" loading="lazy" decoding="async" data-i18n-alt="ba.img1Alt" alt="">
+        <img src="assets/before-after/2.jpg" loading="lazy" decoding="async" data-i18n-alt="ba.img2Alt" alt="">
+        <img src="assets/before-after/3.jpg" loading="lazy" decoding="async" data-i18n-alt="ba.img3Alt" alt="">
+        <img src="assets/before-after/4.jpg" loading="lazy" decoding="async" data-i18n-alt="ba.img4Alt" alt="">
+        <img src="assets/before-after/5.jpg" loading="lazy" decoding="async" data-i18n-alt="ba.img5Alt" alt="">
+      </div>
+      <div class="stepNav baNav">
+        <button type="button" class="stepArrow" id="baPrev" data-i18n-aria="ba.prev">&#8249;</button>
+        <div class="stepDots" id="baDots"></div>
+        <button type="button" class="stepArrow" id="baNext" data-i18n-aria="ba.next">&#8250;</button>
+        <span class="baCount" id="baCount" aria-live="polite"></span>
+      </div>
     </div>
   </div>
 </section>
@@ -661,7 +744,7 @@ const canvas = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(38, 1, 0.005, 5);
@@ -713,8 +796,8 @@ scene.add(shadowPlane);
 const ANCHOR_KEYS = [
   { az:  -6, el: 12, dist: 0.156, seat: 0.00 }, // hero — hovering, unseated
   { az: -20, el: 14, dist: 0.140, seat: 1.00 }, // what it is — fully bonded
-  { az: -38, el: 20, dist: 0.128, seat: 1.00 }, // material — closer three-quarter, reads the surface
-  { az:   4, el: 78, dist: 0.145, seat: 1.00 }, // veneer vs crown — occlusal, straight from above
+  { az: -38, el: 20, dist: 0.116, seat: 1.00 }, // material — in close on the shells, reads the surface
+  { az:   4, el: 78, dist: 0.132, seat: 1.00 }, // veneer vs crown — occlusal, in on the anterior six
   { az:  -6, el: 18, dist: 0.150, seat: 1.00 }, // suitability
   { az:   0, el: 14, dist: 0.152, seat: 1.00 }, // consult
 ];
@@ -730,10 +813,13 @@ const I18N = {
     hero: {
       eyebrow: 'Behandlung · Veneers',
       h1: 'Eine Schale aus Keramik, <em>dünner</em> als ein Fingernagel.',
+      gaugeTitle: 'Wie d\u00fcnn ist d\u00fcnn?',
+      gaugeMag: (n) => `${n}-fach vergr\u00f6\u00dfert`,
+      gVeneer: 'ein Veneer',
+      gNail: 'Ihr Fingernagel',
+      gCard: 'eine Bankkarte',
+      gNote: 'tats\u00e4chliche St\u00e4rke \u00b7 2 Materialien \u00b7 15+ Jahre haltbar',
       lead: 'Scrollen Sie – und sechs Schalen legen sich Zug um Zug auf die vorbereiteten Zähne: erst die Eckzähne, zuletzt die mittleren Schneidezähne. Dabei entsteht kein neuer Zahn, nur eine neue Oberfläche – Farbe, Kontur und Lichtspiel verändern sich, während die eigene Zahnsubstanz weitgehend erhalten bleibt.',
-      stat1: '<b>0,3–0,5</b><small>mm Stärke</small>',
-      stat2: '<b>2</b><small>Materialien</small>',
-      stat3: '<b>15+</b><small>Jahre haltbar</small>',
     },
     what: {
       h2: 'Aufgeklebt auf den Zahn – nicht am Knochen verankert.',
@@ -779,6 +865,8 @@ const I18N = {
     ba: {
       h2: 'Vorher und nachher.',
       p: 'Reale Fälle aus unserer Praxis in Aachen – veröffentlicht mit freundlicher Genehmigung unserer Patientinnen und Patienten.',
+      prev: 'Vorheriger Fall',
+      next: 'N\u00e4chster Fall',
       img1Alt: 'Vorher-Nachher-Vergleich mit Veneers, Fall 1',
       img2Alt: 'Vorher-Nachher-Vergleich mit Veneers, Fall 2',
       img3Alt: 'Vorher-Nachher-Vergleich mit Veneers, Fall 3',
@@ -820,10 +908,13 @@ const I18N = {
     hero: {
       eyebrow: 'Treatment · Veneers',
       h1: 'A shell of ceramic, <em>thinner</em> than a fingernail.',
+      gaugeTitle: 'How thin is thin?',
+      gaugeMag: (n) => `magnified ${n}\u00d7`,
+      gVeneer: 'a veneer',
+      gNail: 'your fingernail',
+      gCard: 'a bank card',
+      gNote: 'true thickness \u00b7 2 materials \u00b7 15+ years typical',
       lead: 'Scroll — and six shells settle onto the prepared teeth, one pair at a time: canines first, the central incisors last. No new tooth is created here, only a new surface — colour, contour and the way light plays across it change, while the tooth itself stays largely intact.',
-      stat1: '<b>0.3–0.5</b><small>mm thickness</small>',
-      stat2: '<b>2</b><small>materials</small>',
-      stat3: '<b>15+</b><small>years typical</small>',
     },
     what: {
       h2: 'Bonded to the tooth — not anchored to the bone.',
@@ -869,6 +960,8 @@ const I18N = {
     ba: {
       h2: 'Before and after.',
       p: 'Real cases from our practice in Aachen, published with our patients\' kind permission.',
+      prev: 'Previous case',
+      next: 'Next case',
       img1Alt: 'Veneers before-and-after comparison, case 1',
       img2Alt: 'Veneers before-and-after comparison, case 2',
       img3Alt: 'Veneers before-and-after comparison, case 3',
@@ -917,6 +1010,7 @@ function applyLang(lang) {
   currentLang = lang;
   document.documentElement.lang = lang;
   document.title = I18N[lang].title;
+  if (typeof updateGaugeMag === 'function') updateGaugeMag();
   metaDescriptionTag.setAttribute('content', I18N[lang].metaDescription);
   document.querySelectorAll('[data-i18n]').forEach((el) => {
     const val = getPath(I18N[lang], el.getAttribute('data-i18n'));
@@ -1110,6 +1204,15 @@ function resize() {
   measureViewport();
   if (typeof updateFraming === 'function') updateFraming();
   if (typeof placeStepSlot === 'function') placeStepSlot();
+  updateGaugeMag();
+}
+// The gauge's magnification is a CSS token that changes per breakpoint; the
+// label is read back from it so "20-fach" can never be shown over 12x bars.
+function updateGaugeMag() {
+  const g = document.querySelector('.gauge'), el = document.getElementById('gaugeMag');
+  if (!g || !el) return;
+  const n = Math.round(parseFloat(getComputedStyle(g).getPropertyValue('--mag')) || 20);
+  el.textContent = I18N[currentLang].hero.gaugeMag(n);
 }
 
 // ANCHOR_KEYS distances are framed for the tall desktop stage (aspect ~0.8),
@@ -1133,7 +1236,7 @@ let coverFrac = 0, distMul = 1;
    same way (max-md:translate-y-[4svh] on the poster). 0 on desktop, where the
    copy is a separate column and the arch keeps the centre. */
 const journeyLift = window.matchMedia('(max-width: 900px)');
-function liftFraction() { return journeyLift.matches ? 0.46 : 0; }
+function liftFraction() { return journeyLift.matches ? 0.68 : 0; }
 
 function updateFraming() {
   const band = canvas.clientHeight || 1;
@@ -1194,6 +1297,28 @@ function frame() {
 addEventListener('scroll', readScroll, { passive: true });
 addEventListener('resize', resize);
 applyLang(currentLang);
+// Before/after viewer - the step gallery's control, with its own index.
+const baImgs = Array.from(document.querySelectorAll('#baStage img'));
+const baDotsEl = document.getElementById('baDots');
+const baCountEl = document.getElementById('baCount');
+let baIdx = 0;
+const baDots = baImgs.map((_, i) => {
+  const d = document.createElement('button');
+  d.type = 'button'; d.className = 'stepDot';
+  d.addEventListener('click', () => baSet(i));
+  baDotsEl.appendChild(d);
+  return d;
+});
+function baSet(i) {
+  baIdx = (i + baImgs.length) % baImgs.length;
+  baImgs.forEach((im, k) => im.classList.toggle('active', k === baIdx));
+  baDots.forEach((d, k) => { d.classList.toggle('on', k === baIdx); d.setAttribute('aria-pressed', String(k === baIdx)); });
+  baCountEl.textContent = `${baIdx + 1} / ${baImgs.length}`;
+}
+document.getElementById('baPrev').addEventListener('click', () => baSet(baIdx - 1));
+document.getElementById('baNext').addEventListener('click', () => baSet(baIdx + 1));
+baSet(0);
+
 resize(); readScroll(); setStep(0); frame();
 
 // reveal copy from measured geometry (IntersectionObserver is unreliable
