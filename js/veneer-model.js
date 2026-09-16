@@ -1,5 +1,5 @@
 // Programmatic dental veneer study model. Real-world metres, y-up.
-// buildVeneerModel(THREE) -> { root, veneers, setExplode, setSeating }
+// buildVeneerModel(THREE) -> { root, model, veneers, setSeating }
 // Ported verbatim from the design handoff — pure three.js geometry, no
 // framework and no branding, so it needs no changes for this build.
 
@@ -186,18 +186,6 @@ export function buildVeneerModel(THREE) {
   root.position.x -= c.x;
   root.position.z -= c.z;
 
-  // t = 0 seated, 1 fully lifted off the prepared enamel
-  function setExplode(t) {
-    for (const s of veneers) {
-      const k = t * s.userData.lead;
-      s.position.set(s.userData.rest.x, s.userData.rest.y - 0.0012 * k, s.userData.rest.z + 0.0085 * k);
-      s.rotation.x = -0.10 * k;
-    }
-  }
-
-  // p = 0 all shells hovering off the preps, 1 all seated.
-  // Pairs snap on in order (canines, laterals, centrals) with a hard
-  // ease-out so each one lands rather than drifts.
   // p = 0 all shells hovering well clear of the preps - over two tooth widths
   // out and fanned open, so the "before" is unmistakable - 1 all seated. Pairs
   // land in order (canines, laterals, centrals), each with a hard arrival, a
@@ -229,5 +217,5 @@ export function buildVeneerModel(THREE) {
     }
   }
 
-  return { root, model, veneers, setExplode, setSeating };
+  return { root, model, veneers, setSeating };
 }

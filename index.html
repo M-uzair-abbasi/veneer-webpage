@@ -10,19 +10,13 @@
 <script type="importmap">
 {
   "imports": {
-    "three": "./js/vendor/three/three.module.js",
-    "three/addons/controls/OrbitControls.js": "./js/vendor/three/addons/controls/OrbitControls.js",
-    "three/addons/exporters/OBJExporter.js": "./js/vendor/three/addons/exporters/OBJExporter.js",
-    "three/addons/exporters/GLTFExporter.js": "./js/vendor/three/addons/exporters/GLTFExporter.js"
+    "three": "./js/vendor/three/three.module.js"
   }
 }
 </script>
 <style>
-  /* Dark-luxury palette: near-black stage, porcelain-white type, one warm
-     gold accent. Dark backgrounds let the 3D model and photography read
-     dramatically (the canvas is alpha:true, so --paper shows straight
-     through as its backdrop) — a deliberate departure from the main
-     site's light, blue-accented look. */
+  /* The canvas is alpha:true, so --paper shows straight through as the
+     3D model's backdrop. */
   :root {
     /* Values lifted verbatim from the main site's "Ink & Mint" light theme
        (aixsmile/app/globals.css @theme) so the two sites read as one practice:
@@ -156,8 +150,6 @@
     .gaugeNote i { transform-origin: left center; animation: slabGrow .6s cubic-bezier(.2,.7,.2,1) 2.25s both; }
     .hint { animation: hintPulse 2.6s ease-in-out 2.4s infinite; }
   }
-  @keyframes rise { to { opacity: 1; transform: none; } }
-  @keyframes hdrIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
   @keyframes curtainUp { to { clip-path: inset(0 0 100% 0); } }
   @keyframes riseIn { to { opacity: 1; transform: none; } }
   @keyframes wordUp { from { transform: translateY(112%); } to { transform: none; } }
@@ -280,7 +272,6 @@
   .swatch--composite { background: #e9e5dc; box-shadow: inset 0 0 0 1px rgba(11,30,44,.04); }
   .materialLead { font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase;
     color: var(--accent); margin: 0 0 12px; }
-  .material p:last-child { margin: 0; font-size: 15px; color: var(--ink-soft); }
   .materialNote { margin-top: 22px; padding: 16px 18px; border-left: 2px solid var(--accent);
     background: var(--card-cool); font-size: 14.5px; color: var(--text); }
   .materialNote b { color: var(--ink); font-weight: 600; }
@@ -895,7 +886,7 @@ const fill = new THREE.DirectionalLight(0xe4ecf6, 0.62);
 fill.position.set(-0.14, 0.06, -0.10);
 scene.add(fill);
 
-const { root, veneers, setSeating } = buildVeneerModel(THREE);
+const { root, setSeating } = buildVeneerModel(THREE);
 root.traverse(n => { if (n.isMesh) { n.castShadow = true; n.receiveShadow = true; } });
 const pivot = new THREE.Group();
 pivot.add(root);
@@ -914,13 +905,10 @@ shadowPlane.position.y = -(box.max.y - box.min.y) / 2 - 0.001;
 shadowPlane.receiveShadow = true;
 scene.add(shadowPlane);
 
-// Five camera/seating stops for the 3D model — hero and "what it is" (the
-// seating animation runs across these two and is fully bonded, seat=1, by
-// the time "what it is" ends, i.e. before the process/steps section),
-// then crown-comparison, suitability, consult once the model reappears
-// after the steps section. The steps section itself has no 3D anchor —
-// see stepLis/updateSteps() below, which swaps in step photos instead.
-// Captions live in I18N so they can switch language without touching this.
+// Camera/seating stops, one per .block[data-anchor] in document order. The
+// shells seat between the hero and "what it is" and stay bonded after that.
+// The process section has no stop: on a laptop the stage shows step photos
+// there instead (see updateSteps). Captions live in I18N.
 const ANCHOR_KEYS = [
   { az:  -6, el: 12, dist: 0.156, seat: 0.00 }, // hero — hovering, unseated
   { az: -20, el: 14, dist: 0.140, seat: 1.00 }, // what it is — fully bonded
@@ -1178,7 +1166,7 @@ function applyLang(lang) {
   currentLang = lang;
   document.documentElement.lang = lang;
   document.title = I18N[lang].title;
-  if (typeof updateGaugeMag === 'function') updateGaugeMag();
+  updateGaugeMag();
   metaDescriptionTag.setAttribute('content', I18N[lang].metaDescription);
   document.querySelectorAll('[data-i18n]').forEach((el) => {
     const val = getPath(I18N[lang], el.getAttribute('data-i18n'));
@@ -1208,21 +1196,14 @@ document.getElementById('footYear').textContent = new Date().getFullYear();
 const caption = document.getElementById('caption');
 const hint = document.getElementById('hint');
 let capIndex = -1;
-window.__cam = null;
 const state = { az: ANCHOR_KEYS[0].az, el: ANCHOR_KEYS[0].el, dist: ANCHOR_KEYS[0].dist, seat: ANCHOR_KEYS[0].seat };
 const target = { ...state };
 
 function lerp(a, b, t) { return a + (b - a) * t; }
 
-// 3D-model anchors, in document order: hero, what-it-is, crown, suitability,
-// consult. The process/steps block is deliberately NOT one of these — while
-// it's on screen the 3D model is hidden (see updateSteps) in favour of a
-// per-step photo, so it needs no camera anchor of its own.
-// Declarative: every .block carrying [data-anchor] is a camera stop, in document
-// order, matched 1:1 to ANCHOR_KEYS and I18N[lang].captions. The process/steps
-// block has no [data-anchor] because the 3D model is hidden while it is on
-// screen. Adding a section is now: add the attribute, add one ANCHOR_KEYS entry,
-// add one caption per language — no positional index array to keep in sync.
+// Every .block[data-anchor] is a camera stop, matched 1:1 to ANCHOR_KEYS and
+// I18N[lang].captions. Adding a section: add the attribute, one ANCHOR_KEYS
+// entry and one caption per language.
 const anchors = Array.from(document.querySelectorAll('.block[data-anchor]'));
 if (anchors.length !== ANCHOR_KEYS.length) {
   console.warn(`anchor/key mismatch: ${anchors.length} [data-anchor] blocks vs ${ANCHOR_KEYS.length} ANCHOR_KEYS`);
@@ -1232,7 +1213,6 @@ const stepLis = Array.from(document.querySelectorAll('ol.steps > li'));
 const stepImages = Array.from(document.querySelectorAll('.stepImages img'));
 const stagewrapEl = document.getElementById('stagewrap');
 const stepCounterEl = document.getElementById('stepCounter');
-const stepImagesHost = document.getElementById('stepImages');
 let activeStepIndex = 0;
 
 // Stable viewport height for every scroll threshold below.
@@ -1261,11 +1241,8 @@ measureViewport();
 // position has moved from anchor A crossing the reading line to anchor B
 // crossing it — robust regardless of how tall any given section is.
 function anchorProgress() {
-  // The reading line is the TOP of the viewport, not its middle: a section is
-  // at rest when its top sits at 0, and that is where the camera should be
-  // exactly on its anchor - hero at load included. Measured from mid-screen
-  // the hero's top was already half a screen past the line before any scroll,
-  // so the page opened with the shells half seated.
+  // The reading line is the top of the viewport: a section at rest (top at 0)
+  // sits exactly on its anchor, the hero at load included.
   const trigger = 0;
   const tops = anchors.map((el) => el.getBoundingClientRect().top);
   let i = 0;
@@ -1273,13 +1250,8 @@ function anchorProgress() {
     if (tops[k] <= trigger) i = k;
   }
   i = Math.min(i, anchors.length - 2);
-  // Anchor i has crossed the reading line, anchor i+1 is still below it, so
-  // the distance between them is tops[i+1] - tops[i] (positive) and progress
-  // is how far the line has travelled from the first toward the second. This
-  // was written the other way round, which made the span negative and pinned
-  // f at 0: the camera never interpolated at all - it snapped at each anchor
-  // and the per-frame smoothing glided after the snap, which is what read as
-  // "it changes to the next step after a little scroll".
+  // Anchor i has crossed the line and anchor i+1 is still below it; progress
+  // is how far the line has travelled from the first toward the second.
   const span = tops[i + 1] - tops[i];
   const f = span > 1 ? (trigger - tops[i]) / span : (tops[i + 1] <= trigger ? 1 : 0);
   return { i, f: Math.min(1, Math.max(0, f)) };
@@ -1292,22 +1264,13 @@ function updateStepCounter() {
   stepCounterEl.setAttribute('aria-label', I18N[currentLang].stepCounter(activeStepIndex + 1));
 }
 
-// Swaps the pinned stage between the 3D model and the step photos, and
-// keeps both the active photo and the dimmed/highlighted step text in
-// sync with whichever step is nearest the reading line.
-/* The veneers page's StepImageGallery, ported: ONE `active` index drives the
-   step list, the image slot, the caption and the dots, so every control moves
-   the other two. Click a step and its photo swaps in; move the photo with the
-   arrows or dots and the step follows. The image slot is the stage - the right
-   column on a laptop, the framed plate above the steps on a phone - which is
-   the same left-steps / right-image relationship in both. Click-driven, like
-   the original; scrolling no longer changes the step under the reader. */
-// The image slot lives in two places. On a laptop it is the right-hand stage
-// column, which IS the "images on the right" half of the gallery. On a phone
-// there is no second column, so it has to travel with the section - pinned in
-// the sticky stage it stayed put while the step list scrolled underneath it.
-// Driven from resize(), not a matchMedia listener: the media query's change
-// event was seen to miss crossings earlier in this file's history.
+/* Step gallery, ported from the main site's StepImageGallery: one `active`
+   index drives the step list, the image slot, the caption and the dots, so
+   every control moves the others. Click-driven; scrolling never changes the
+   step. The image slot is the sticky stage on a laptop (the "images on the
+   right" half) and the framed plate above the steps on a phone, where it has
+   to travel with the section. Placed from resize(), not a matchMedia change
+   listener, which can miss crossings. */
 const stepFigureEl = document.getElementById('stepFigure');
 const stepImagesEl = document.getElementById('stepImages');
 const galleryStacks = window.matchMedia('(max-width: 900px)');
@@ -1353,22 +1316,15 @@ document.getElementById('stepNext').addEventListener('click', () => setStep(acti
 function updateSteps() {
   const rect = processSection.getBoundingClientRect();
   const inView = rect.top < vpH * 0.9 && rect.bottom > vpH * 0.1;
-  // Kept on for phones too. There the photos are no longer children of the
-  // stage, so `.stagewrap.mode-images .stepImages` matches nothing and only the
-  // useful half applies: the 3D model is hidden and the stage falls back to
-  // plain paper behind the step list, instead of the arch showing through it.
-  // On a phone the step photos are inline in the section, so there is nothing
-  // for the stage to swap to; toggling this there only faded the model out for
-  // the whole stretch around the steps and popped it back afterwards.
+  // Laptop: the stage swaps from the model to the step photos while the
+  // process section is on screen. Phone: the photos are inline in the section,
+  // so the model is only veiled while the step photo or a flipped material
+  // card is actually passing over its band.
   stagewrapEl.classList.toggle('mode-images', inView && !journeyLift.matches);
-  // Phone: the step photo and any flipped material card scroll THROUGH the
-  // model's band. Fade the model out only while one of them is actually over
-  // it - a short local veil, not the long hide-around-the-steps that read as
-  // the model vanishing at random.
   if (journeyLift.matches) {
     const bandTop = vpH * 0.06, bandBottom = vpH * 0.47;
-    const crossing = [document.getElementById('stepFigure'), ...document.querySelectorAll('.flip.is-flipped')]
-      .filter(Boolean).some((el) => { const r = el.getBoundingClientRect(); return r.bottom > bandTop && r.top < bandBottom; });
+    const crossing = [stepFigureEl, ...document.querySelectorAll('.flip.is-flipped')]
+      .some((el) => { const r = el.getBoundingClientRect(); return r.bottom > bandTop && r.top < bandBottom; });
     stagewrapEl.classList.toggle('veiled', crossing);
   } else {
     stagewrapEl.classList.remove('veiled');
@@ -1376,7 +1332,6 @@ function updateSteps() {
 }
 
 function readScroll() {
-  measureLift();
   const { i, f } = anchorProgress();
   // Laptop: smoothstep - the camera rests while you read a section and moves in
   // the gap between sections. Phone: (near) linear - a phone is scrolled in
@@ -1406,10 +1361,9 @@ function resize() {
   camera.aspect = w / Math.max(1, h);
   camera.updateProjectionMatrix();
   measureViewport();
-  if (typeof updateFraming === 'function') updateFraming();
-  if (typeof placeStepSlot === 'function') placeStepSlot();
+  updateFraming();
+  placeStepSlot();
   updateGaugeMag();
-  measureLift();
 }
 // The gauge's magnification is a CSS token that changes per breakpoint; the
 // label is read back from it so "20-fach" can never be shown over 12x bars.
@@ -1435,26 +1389,14 @@ const REF_ASPECT = 0.8;
 const HALF_FOV_TAN = Math.tan(38 * Math.PI / 360);
 let coverFrac = 0, distMul = 1;
 
-/* How far the copy overlays the stage from the bottom. On phones the stage is
-   full-screen and the copy sits over its lower two-thirds, so the arch has to
-   ride UP into the part that stays clear - the main site nudges its tooth the
-   same way (max-md:translate-y-[4svh] on the poster). 0 on desktop, where the
-   copy is a separate column and the arch keeps the centre. */
+/* On a phone the stage is full-screen and the copy scrolls over its lower
+   part, so the model holds one fixed position: centred at PHONE_MODEL_CENTRE
+   of the screen (the CSS --cy token for the grid/pocket matches it). It is a
+   constant, not measured against the copy - a moving target read as the model
+   vanishing at random. 0 on a laptop, where the copy is a separate column. */
 const journeyLift = window.matchMedia('(max-width: 900px)');
-/* On a phone the model holds ONE position - centre at PHONE_MODEL_CENTRE of
-   the screen - and is never hidden. It used to be re-measured against the
-   copy's live top edge on every scroll event, which made it rise and sink as
-   each section's text passed and let the scrim slide over it; that read as
-   the model vanishing and reappearing at random. The copy travels past it. */
-let liftTarget = 0, liftCur = 0, liftSnapped = false;
 const PHONE_MODEL_CENTRE = 0.27;   // fraction of the screen from the top
-function measureLift() {
-  if (!journeyLift.matches) { liftTarget = 0; return; }
-  liftTarget = 2 * (0.5 - PHONE_MODEL_CENTRE);
-  if (!liftSnapped) { liftCur = liftTarget; liftSnapped = true; }
-  stagewrapEl.style.setProperty('--cy', (PHONE_MODEL_CENTRE * 100) + '%');
-}
-function liftFraction() { return liftCur; }
+function liftFraction() { return journeyLift.matches ? 2 * (0.5 - PHONE_MODEL_CENTRE) : 0; }
 
 function updateFraming() {
   const band = canvas.clientHeight || 1;
@@ -1489,10 +1431,10 @@ if ('IntersectionObserver' in window) {
 
 let idle = 0;
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-// Landing dolly: the camera starts a little further out and swung round,
-// and settles onto the hero anchor over the first ~1.6s.
+// Landing dolly: the camera starts further out and swung round, and settles
+// onto the hero anchor over INTRO_MS (cued behind the curtain).
 const introStart = performance.now();
-const INTRO_MS = 2300;   // cued behind the curtain
+const INTRO_MS = 2300;
 // Pointer parallax on fine pointers only: a few degrees of look-around.
 let ptrX = 0, ptrY = 0, curPx = 0, curPy = 0;
 if (!reduceMotion && window.matchMedia('(pointer: fine)').matches) {
@@ -1519,7 +1461,6 @@ function frame() {
   const el = (state.el + (Math.cos(idle * 0.8) * 1.3 + curPy * 2) * sway + 16 * (1 - intro)) * Math.PI / 180;
   // a gentle vertical float so the object never sits dead still
   pivot.position.y = sway * Math.sin(idle * 1.4) * 0.0022;
-  liftCur = lerp(liftCur, liftTarget, 0.08);
   const d = state.dist * distMul * (1 + 0.55 * (1 - intro));
   camera.position.set(
     d * Math.cos(el) * Math.sin(az),
@@ -1589,13 +1530,7 @@ document.getElementById('baPrev').addEventListener('click', () => baSet(baIdx - 
 document.getElementById('baNext').addEventListener('click', () => baSet(baIdx + 1));
 baSet(0);
 
-window.__cam = { state, target }; window.__veneers = veneers;
 resize(); readScroll(); setStep(0); frame();
-
-// reveal copy from measured geometry (IntersectionObserver is unreliable
-// inside a clipped preview frame)
-
-
 </script>
 </body>
 </html>
