@@ -133,9 +133,12 @@
   @media (prefers-reduced-motion: no-preference) {
     /* Landing: the stage lifts in, the camera dollies and settles (JS), the
        headline rises line by line, then the gauge draws its own thickness. */
-    header.top { animation: hdrIn .7s cubic-bezier(.2,.7,.2,1) both; }
-    .stage3d { animation: stageIn 1.2s cubic-bezier(.2,.7,.2,1) .1s both; }
-    .stagewrap::before { animation: fadeIn 1.4s ease .3s both; }
+    header.top { animation: hdrIn .7s cubic-bezier(.2,.7,.2,1) backwards; }
+    /* fill-mode backwards, NOT both: an animation's final keyframe outranks
+       ordinary rules, and holding opacity:1 here overrode the .mode-images
+       hide - the model showed through the step photo. */
+    .stage3d { animation: stageIn 1.2s cubic-bezier(.2,.7,.2,1) .1s backwards; }
+    .stagewrap::before { animation: fadeIn 1.4s ease .3s backwards; }
     .block:first-child > * { opacity: 0; transform: translateY(18px);
       animation: rise .8s cubic-bezier(.2,.7,.2,1) .28s forwards; }
     .slab i { transform-origin: left center; animation: slabGrow .9s cubic-bezier(.2,.7,.2,1) both; }
@@ -417,7 +420,7 @@
     margin: 0; padding: 34px 18px 14px; pointer-events: none;
     font-size: 13.5px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums;
     background: linear-gradient(to top, rgba(11, 30, 44, .82), rgba(11, 30, 44, .34) 46%, transparent); }
-  .stagewrap.mode-images .stage3d { opacity: 0; pointer-events: none; }
+  .stagewrap.mode-images .stage3d, .stagewrap.veiled .stage3d { opacity: 0; pointer-events: none; }
   .stagewrap.mode-images .stepImages { opacity: 1; pointer-events: auto; }
 
   .beforeAfter { border-top: 1px solid var(--line); padding: 104px clamp(28px, 5vw, 88px) 88px; }
@@ -1301,6 +1304,18 @@ function updateSteps() {
   // for the stage to swap to; toggling this there only faded the model out for
   // the whole stretch around the steps and popped it back afterwards.
   stagewrapEl.classList.toggle('mode-images', inView && !journeyLift.matches);
+  // Phone: the step photo and any flipped material card scroll THROUGH the
+  // model's band. Fade the model out only while one of them is actually over
+  // it - a short local veil, not the long hide-around-the-steps that read as
+  // the model vanishing at random.
+  if (journeyLift.matches) {
+    const bandTop = vpH * 0.06, bandBottom = vpH * 0.47;
+    const crossing = [document.getElementById('stepFigure'), ...document.querySelectorAll('.flip.is-flipped')]
+      .filter(Boolean).some((el) => { const r = el.getBoundingClientRect(); return r.bottom > bandTop && r.top < bandBottom; });
+    stagewrapEl.classList.toggle('veiled', crossing);
+  } else {
+    stagewrapEl.classList.remove('veiled');
+  }
 }
 
 function readScroll() {
