@@ -442,7 +442,7 @@
        around it, instead of sitting in a band at the top that the page scrolls
        past. z-order: stage 1, copy 2, header 5. */
     .stagewrap { position: sticky; top: 0; height: 100svh; order: -1;
-      --cx: 50%; --cy: 30%; --copyTop: 60%; z-index: 1; }
+      --cx: 50%; --cy: 27%; z-index: 1; }
     .copy { margin-top: -100svh; position: relative; z-index: 2; }
     /* Copy sits low so the model reads above it - the main site does the same
        on phones (the act carries pt-[14svh] pb-24, the poster is nudged down
@@ -468,13 +468,15 @@
        edge (centre --cy plus ~half its height), so the fade can never land on
        the model. When a tall section leaves no gap the stops meet and the copy
        simply overlaps the model's base with a hard edge. */
+    /* Fixed: solid paper across the lower part, clear by 62% from the bottom -
+       comfortably under the model, whose bottom edge sits near 63%. It no
+       longer follows the copy, so it cannot climb over the model as a tall
+       section scrolls up; the copy simply passes over the model's base. */
     .stagewrap::after { content: ''; position: absolute; inset: 0; pointer-events: none;
-      --solid: calc(100% - var(--copyTop, 60%) + 1%);
-      --clear: calc(100% - var(--cy, 30%) - 12%);
       background: linear-gradient(to top,
-        var(--paper) 0%, var(--paper) var(--solid),
-        rgba(239, 236, 229, .55) calc(var(--solid) + (var(--clear) - var(--solid)) * .45),
-        transparent var(--clear)); }
+        var(--paper) 0%, var(--paper) 40%,
+        rgba(239, 236, 229, .62) 52%,
+        transparent 62%); }
     .caption, .scalebar, .hint { display: none; }
 
     /* Steps, in the main site's format (components/home/FirstVisit.tsx):
@@ -1250,7 +1252,10 @@ function updateSteps() {
   // stage, so `.stagewrap.mode-images .stepImages` matches nothing and only the
   // useful half applies: the 3D model is hidden and the stage falls back to
   // plain paper behind the step list, instead of the arch showing through it.
-  stagewrapEl.classList.toggle('mode-images', inView);
+  // On a phone the step photos are inline in the section, so there is nothing
+  // for the stage to swap to; toggling this there only faded the model out for
+  // the whole stretch around the steps and popped it back afterwards.
+  stagewrapEl.classList.toggle('mode-images', inView && !journeyLift.matches);
 }
 
 function readScroll() {
@@ -1314,31 +1319,18 @@ let coverFrac = 0, distMul = 1;
    same way (max-md:translate-y-[4svh] on the poster). 0 on desktop, where the
    copy is a separate column and the arch keeps the centre. */
 const journeyLift = window.matchMedia('(max-width: 900px)');
-/* On a phone the model is centred in whatever room the current section's copy
-   leaves above it - never lower than just above centre, never into the header.
-   Short copy lets it sit near the middle of the screen; a tall section lifts
-   it. Measured on scroll, eased per frame; the stage's contrast pocket and
-   paper scrim follow it via --cy / --copyTop. */
+/* On a phone the model holds ONE position - centre at PHONE_MODEL_CENTRE of
+   the screen - and is never hidden. It used to be re-measured against the
+   copy's live top edge on every scroll event, which made it rise and sink as
+   each section's text passed and let the scrim slide over it; that read as
+   the model vanishing and reappearing at random. The copy travels past it. */
 let liftTarget = 0, liftCur = 0, liftSnapped = false;
+const PHONE_MODEL_CENTRE = 0.27;   // fraction of the screen from the top
 function measureLift() {
   if (!journeyLift.matches) { liftTarget = 0; return; }
-  const hdrEl = document.querySelector('header.top');
-  const hdr = hdrEl ? hdrEl.getBoundingClientRect().height : 0;
-  let copyTop = vpH;
-  for (const bl of document.querySelectorAll('.copy .block')) {
-    const r = bl.getBoundingClientRect();
-    if (r.bottom <= hdr || r.top >= vpH) continue;
-    const first = bl.children[0]; if (!first) continue;
-    const t = first.getBoundingClientRect().top;
-    if (t > hdr && t < copyTop) copyTop = t;
-  }
-  const centre = Math.min(0.42, Math.max(0.17, (hdr + copyTop) / 2 / vpH));
-  liftTarget = 2 * (0.5 - centre);
-  // First measurement snaps: on load the model should already be in place,
-  // not ride up from the centre while the page settles. Eased after that.
+  liftTarget = 2 * (0.5 - PHONE_MODEL_CENTRE);
   if (!liftSnapped) { liftCur = liftTarget; liftSnapped = true; }
-  stagewrapEl.style.setProperty('--cy', (centre * 100).toFixed(1) + '%');
-  stagewrapEl.style.setProperty('--copyTop', (copyTop / vpH * 100).toFixed(1) + '%');
+  stagewrapEl.style.setProperty('--cy', (PHONE_MODEL_CENTRE * 100) + '%');
 }
 function liftFraction() { return liftCur; }
 
