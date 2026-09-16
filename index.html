@@ -1169,7 +1169,12 @@ measureViewport();
 // position has moved from anchor A crossing the reading line to anchor B
 // crossing it — robust regardless of how tall any given section is.
 function anchorProgress() {
-  const trigger = vpH * 0.5;
+  // The reading line is the TOP of the viewport, not its middle: a section is
+  // at rest when its top sits at 0, and that is where the camera should be
+  // exactly on its anchor - hero at load included. Measured from mid-screen
+  // the hero's top was already half a screen past the line before any scroll,
+  // so the page opened with the shells half seated.
+  const trigger = 0;
   const tops = anchors.map((el) => el.getBoundingClientRect().top);
   let i = 0;
   for (let k = 0; k < tops.length; k++) {
