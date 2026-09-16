@@ -141,11 +141,10 @@
     #curtain { position: fixed; inset: 0; z-index: 8; pointer-events: none; background: var(--paper);
       animation: curtainUp 1.05s cubic-bezier(.76, 0, .18, 1) .12s forwards; }
     #curtain::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--accent); opacity: .6; }
-    header.top { animation: hdrIn .8s cubic-bezier(.2,.7,.2,1) .55s backwards; }
     .stage3d { animation: stageIn 1.4s cubic-bezier(.2,.7,.2,1) .45s backwards; }
     .stagewrap::before { animation: fadeIn 1.6s ease .7s backwards; }
-    .block:first-child > * { opacity: 0; transform: translateY(26px); filter: blur(6px);
-      animation: riseIn .95s cubic-bezier(.2,.7,.2,1) .7s forwards; }
+    .block:first-child > * { opacity: 0; transform: translateY(22px);
+      animation: riseIn .9s cubic-bezier(.2,.7,.2,1) .7s forwards; }
     .block:first-child > :nth-child(2) { animation-delay: .8s; }
     .block:first-child > :nth-child(3) { animation-delay: 1.15s; }
     .block:first-child > :nth-child(4) { animation-delay: 1.3s; }
@@ -160,7 +159,7 @@
   @keyframes rise { to { opacity: 1; transform: none; } }
   @keyframes hdrIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
   @keyframes curtainUp { to { clip-path: inset(0 0 100% 0); } }
-  @keyframes riseIn { to { opacity: 1; transform: none; filter: blur(0); } }
+  @keyframes riseIn { to { opacity: 1; transform: none; } }
   @keyframes wordUp { from { transform: translateY(112%); } to { transform: none; } }
   @keyframes hintPulse { 0%, 100% { opacity: .45; transform: translateX(-50%) translateY(0); } 50% { opacity: 1; transform: translateX(-50%) translateY(4px); } }
   @media (prefers-reduced-motion: reduce) { #curtain { display: none; } }
@@ -181,15 +180,15 @@
      Each section's children rise in a short stagger the first time it enters
      the viewport, then stay. The hero has its own landing sequence above. */
   .js .block:not(:first-child):not(.in) > *,
-  .js .beforeAfter:not(.in) .inner > * { opacity: 0; transform: translateY(34px); filter: blur(7px); }
-  .block:not(:first-child) > *, .beforeAfter .inner > * { filter: none;
-    transition: opacity .95s cubic-bezier(.2,.7,.2,1), transform .95s cubic-bezier(.2,.7,.2,1), filter .8s cubic-bezier(.2,.7,.2,1); }
+  .js .beforeAfter:not(.in) .inner > * { opacity: 0; transform: translateY(30px); }
+  .block:not(:first-child) > *, .beforeAfter .inner > * {
+    transition: opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1); }
   .block.in > :nth-child(2), .beforeAfter.in .inner > :nth-child(2) { transition-delay: .12s; }
   .block.in > :nth-child(3), .beforeAfter.in .inner > :nth-child(3) { transition-delay: .24s; }
   .block.in > :nth-child(4), .beforeAfter.in .inner > :nth-child(4) { transition-delay: .36s; }
   .block.in > :nth-child(n+5) { transition-delay: .45s; }
   @media (prefers-reduced-motion: reduce) {
-    .js .block:not(:first-child):not(.in) > *, .js .beforeAfter:not(.in) .inner > * { transform: none; filter: none; }
+    .js .block:not(:first-child):not(.in) > *, .js .beforeAfter:not(.in) .inner > * { transform: none; }
     .block:not(:first-child) > *, .beforeAfter .inner > * { transition-duration: .15s; transition-delay: 0s !important; }
   }
 
