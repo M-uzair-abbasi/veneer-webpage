@@ -1116,6 +1116,7 @@ document.getElementById('footYear').textContent = new Date().getFullYear();
 const caption = document.getElementById('caption');
 const hint = document.getElementById('hint');
 let capIndex = -1;
+window.__cam = null;
 const state = { az: ANCHOR_KEYS[0].az, el: ANCHOR_KEYS[0].el, dist: ANCHOR_KEYS[0].dist, seat: ANCHOR_KEYS[0].seat };
 const target = { ...state };
 
@@ -1175,8 +1176,15 @@ function anchorProgress() {
     if (tops[k] <= trigger) i = k;
   }
   i = Math.min(i, anchors.length - 2);
-  const span = tops[i] - tops[i + 1];
-  const f = span > 1 ? (tops[i] - trigger) / span : (tops[i + 1] <= trigger ? 1 : 0);
+  // Anchor i has crossed the reading line, anchor i+1 is still below it, so
+  // the distance between them is tops[i+1] - tops[i] (positive) and progress
+  // is how far the line has travelled from the first toward the second. This
+  // was written the other way round, which made the span negative and pinned
+  // f at 0: the camera never interpolated at all - it snapped at each anchor
+  // and the per-frame smoothing glided after the snap, which is what read as
+  // "it changes to the next step after a little scroll".
+  const span = tops[i + 1] - tops[i];
+  const f = span > 1 ? (trigger - tops[i]) / span : (tops[i + 1] <= trigger ? 1 : 0);
   return { i, f: Math.min(1, Math.max(0, f)) };
 }
 
@@ -1261,7 +1269,12 @@ function updateSteps() {
 function readScroll() {
   measureLift();
   const { i, f } = anchorProgress();
-  const e = f * f * (3 - 2 * f);
+  // Laptop: smoothstep - the camera rests while you read a section and moves in
+  // the gap between sections. Phone: (near) linear - a phone is scrolled in
+  // flicks, and a curve that parks at both ends of every section then moves
+  // in a burst reads as the view snapping to the next step after a little
+  // scroll. Tied to the finger, the turn is continuous.
+  const e = journeyLift.matches ? f : f * f * (3 - 2 * f);
   const a = ANCHOR_KEYS[i], b = ANCHOR_KEYS[i + 1];
   target.az = lerp(a.az, b.az, e);
   target.el = lerp(a.el, b.el, e);
@@ -1369,10 +1382,11 @@ let idle = 0;
 function frame() {
   if (!stageVisible) { requestAnimationFrame(frame); return; }
   idle += 0.006;
-  state.az = lerp(state.az, target.az, 0.07);
-  state.el = lerp(state.el, target.el, 0.07);
-  state.dist = lerp(state.dist, target.dist, 0.07);
-  state.seat = lerp(state.seat, target.seat, 0.14);
+  const k = journeyLift.matches ? 0.22 : 0.07;   // phone tracks the finger, laptop glides
+  state.az = lerp(state.az, target.az, k);
+  state.el = lerp(state.el, target.el, k);
+  state.dist = lerp(state.dist, target.dist, k);
+  state.seat = lerp(state.seat, target.seat, Math.max(k, 0.14));
 
   const az = (state.az + Math.sin(idle) * 1.6) * Math.PI / 180;
   const el = (state.el + Math.cos(idle * 0.8) * 0.8) * Math.PI / 180;
@@ -1431,6 +1445,7 @@ document.getElementById('baPrev').addEventListener('click', () => baSet(baIdx - 
 document.getElementById('baNext').addEventListener('click', () => baSet(baIdx + 1));
 baSet(0);
 
+window.__cam = { state, target };
 resize(); readScroll(); setStep(0); frame();
 
 // reveal copy from measured geometry (IntersectionObserver is unreliable
