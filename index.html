@@ -1589,7 +1589,7 @@ document.getElementById('baPrev').addEventListener('click', () => baSet(baIdx - 
 document.getElementById('baNext').addEventListener('click', () => baSet(baIdx + 1));
 baSet(0);
 
-window.__cam = { state, target };
+window.__cam = { state, target }; window.__veneers = veneers;
 resize(); readScroll(); setStep(0); frame();
 
 // reveal copy from measured geometry (IntersectionObserver is unreliable

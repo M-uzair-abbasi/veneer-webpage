@@ -103,10 +103,15 @@ export function buildVeneerModel(THREE) {
       }
 
       if (t.veneer) {
-        const shell = new THREE.Mesh(veneerGeo(t.w, t.h, t.d, opts), porcelain);
+        // own material per shell so the contact glow can light one at a time
+        const shell = new THREE.Mesh(veneerGeo(t.w, t.h, t.d, opts), porcelain.clone());
         shell.name = `veneer_${sideName}_${t.name}`;
         shell.position.set(0, 0, crown.position.z);
         shell.userData.rest = shell.position.clone();
+        // hover distances in tooth widths, so the travel reads at any model scale
+        shell.userData.hoverZ = t.w * 2.1;   // out toward the viewer (2.4 sent the canines to the stage edge)
+        shell.userData.hoverY = t.w * 0.55;  // and a little above the prep
+        shell.userData.fan = sideName === 'left' ? -1 : 1;
         shell.userData.lead = t.name === 'central_incisor' ? 1 : (t.name === 'lateral_incisor' ? 0.86 : 0.72);
         // seating order: canines first, centrals last
         shell.userData.order = t.name === 'canine' ? 0 : (t.name === 'lateral_incisor' ? 1 : 2);
@@ -193,22 +198,34 @@ export function buildVeneerModel(THREE) {
   // p = 0 all shells hovering off the preps, 1 all seated.
   // Pairs snap on in order (canines, laterals, centrals) with a hard
   // ease-out so each one lands rather than drifts.
+  // p = 0 all shells hovering well clear of the preps - over two tooth widths
+  // out and fanned open, so the "before" is unmistakable - 1 all seated. Pairs
+  // land in order (canines, laterals, centrals), each with a hard arrival, a
+  // short settle wobble, and a flash of light on contact so the moment reads
+  // as an event and not a drift.
   function setSeating(p) {
-    const STAGGER = 0.20, SPAN = 0.44;
+    const STAGGER = 0.24, SPAN = 0.42;
     for (const s of veneers) {
-      const start = s.userData.order * STAGGER;
+      const d = s.userData;
+      const start = d.order * STAGGER;
       let u = (p - start) / SPAN;
       u = Math.min(1, Math.max(0, u));
-      const snap = 1 - Math.pow(1 - u, 4.5);       // fast arrival
-      const settle = Math.sin(u * Math.PI) * (1 - u) * 0.35; // micro wobble on landing
-      const k = (1 - snap) * s.userData.lead;
+      const ease = 1 - Math.pow(1 - u, 3.2);             // committed approach
+      const snap = u < 0.82 ? ease * 0.92 : 0.92 + (u - 0.82) / 0.18 * 0.08; // last 8% lands in one beat
+      const k = (1 - snap) * d.lead;
+      const settle = u > 0.82 ? Math.sin((u - 0.82) / 0.18 * Math.PI * 2) * (1 - u) * 1.4 : 0;
       s.position.set(
-        s.userData.rest.x,
-        s.userData.rest.y - 0.0016 * k,
-        s.userData.rest.z + 0.0072 * k
+        d.rest.x + d.fan * d.hoverZ * 0.18 * k,
+        d.rest.y + d.hoverY * k,
+        d.rest.z + d.hoverZ * k
       );
-      s.rotation.x = -0.12 * k + settle * 0.05;
-      s.rotation.y = 0.06 * k;
+      s.rotation.x = -0.34 * k + settle * 0.03;
+      s.rotation.y = d.fan * 0.22 * k;
+      s.rotation.z = d.fan * 0.05 * k;
+      // contact glow: a bright pulse as the shell lands, gone once it rests
+      const flash = u > 0.86 && u < 1 ? Math.sin((u - 0.86) / 0.14 * Math.PI) : 0;
+      s.material.emissive.setRGB(1, 0.97, 0.9);
+      s.material.emissiveIntensity = flash * 0.55;
     }
   }
 
